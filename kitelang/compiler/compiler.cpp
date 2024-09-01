@@ -34,6 +34,9 @@ void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode>
 }
 
 void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node) {
+	for (int i = node->args.size(); i < 6; i++) {
+		textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
+	}
 	for (int i = 0; i < node->args.size(); i++) {
 		visit_node(node->args[i], argregs[i]);
 	}
