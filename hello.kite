@@ -1,6 +1,14 @@
+% Kite programming language!
+
+% we can access printf and exit because the object file is linked with GCC
 extern printf
+extern exit
+
 global main
 
+% main "routine", this will be translated to main label in the assembly, so this
+% is the entry point
 routine main {
 	call printf("%d", (1 + 2) * 3)
+	call exit(0)
 }
