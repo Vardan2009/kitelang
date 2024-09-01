@@ -1,0 +1,6 @@
+extern printf
+global main
+
+routine main {
+	call printf("%d", (1 + 2) * 3)
+}
