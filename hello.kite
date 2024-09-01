@@ -6,11 +6,16 @@ extern exit
 
 global main
 
+routine printexpr {
+	% printing out an expression
+	call printf("%d", (2 * (3 + 1)) / 2)
+}
+
 % main "routine", this will be translated to main label in the assembly, so this
 % is the entry point
 routine main {
 	call printf("Hello, Kite!")
 	call printf(10) % ASCII code for newline
-	% printing out an expression
-	call printf("%d", (2 * (3 + 1)) / 2)
+	call printexpr()
+	call exit(0)
 }
