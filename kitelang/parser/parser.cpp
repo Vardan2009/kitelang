@@ -11,13 +11,13 @@ std::shared_ptr<parser::RootNode> parser::Parser::statement_list() {
 }
 
 std::shared_ptr<parser::Node> parser::Parser::statement() {
-	if (peek()->type != lexer::KEYWORD) throw std::runtime_error("expected a statement");
 	std::string stmt = peek()->value_str;
-	if (stmt == "global") return global_node();
-	if (stmt == "extern") return extern_node();
-	if (stmt == "call") return call_node();
-	if (stmt == "routine") return routine_node();
-	throw std::runtime_error("unknown statement " + stmt);
+	if (stmt == "global" && peek()->type == lexer::KEYWORD) return global_node();
+	if (stmt == "extern" && peek()->type == lexer::KEYWORD) return extern_node();
+	if (stmt == "routine" && peek()->type == lexer::KEYWORD) return routine_node();
+	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
+	if (peek()->type == lexer::LBRACE) return statement_list();
+	return expr();
 }
 
 std::shared_ptr<parser::Node> parser::Parser::expr() {
@@ -51,6 +51,20 @@ std::shared_ptr<parser::Node> parser::Parser::factor() {
 		consume(lexer::RPAREN);
 		return n;
 	}
+	if (peek()->type == lexer::IDENTIFIER) {
+		std::string name = advance()->value_str;
+		if (peek()->type != lexer::LPAREN)
+			return std::make_shared<VarNode>(name);
+		consume(lexer::LPAREN);
+		std::vector<std::shared_ptr<Node>> args;
+		while (peek()->type != lexer::RPAREN) {
+			args.push_back(expr());
+			if (peek()->type != lexer::COMMA) break;
+			consume(lexer::COMMA);
+		}
+		consume(lexer::RPAREN);
+		return std::make_shared<CallNode>(name, args);
+	}
 	throw std::runtime_error("invalid factor " + std::to_string(peek()->type));
 }
 
@@ -64,25 +78,20 @@ std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 	return std::make_shared<ExternNode>(advance()->value_str);
 }
 
-std::shared_ptr<parser::CallNode> parser::Parser::call_node() {
-	consume(lexer::KEYWORD, "call");
-	std::string name = advance()->value_str;
-	consume(lexer::LPAREN);
-	std::vector<std::shared_ptr<Node>> args;
-	while (peek()->type != lexer::RPAREN) {
-		args.push_back(expr());
-		if (peek()->type != lexer::COMMA) break;
-		consume(lexer::COMMA);
-	}
-	consume(lexer::RPAREN);
-	return std::make_shared<CallNode>(name, args);
-}
 
 std::shared_ptr<parser::RoutineNode> parser::Parser::routine_node() {
 	consume(lexer::KEYWORD, "routine");
 	std::string name = advance()->value_str;
 	std::shared_ptr<RootNode> root = statement_list();
 	return std::make_shared<RoutineNode>(name, root);
+}
+
+std::shared_ptr<parser::LetNode> parser::Parser::let_node() {
+	consume(lexer::KEYWORD, "let");
+	std::string name = advance()->value_str;
+	consume(lexer::EQ);
+	std::shared_ptr<Node> root = expr();
+	return std::make_shared<LetNode>(name, root);
 }
 
 std::shared_ptr<lexer::Token> parser::Parser::peek() {

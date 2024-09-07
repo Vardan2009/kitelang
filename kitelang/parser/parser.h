@@ -15,7 +15,7 @@ namespace parser {
 		std::shared_ptr<GlobalNode> global_node();
 		std::shared_ptr<ExternNode> extern_node();
 		std::shared_ptr<RoutineNode> routine_node();
-		std::shared_ptr<CallNode> call_node();
+		std::shared_ptr<LetNode> let_node();
 
 		std::shared_ptr<lexer::Token> peek();
 		std::shared_ptr<lexer::Token> advance();

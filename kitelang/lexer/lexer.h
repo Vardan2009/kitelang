@@ -22,9 +22,10 @@ namespace lexer {
 			{'{', lexer::LBRACE},
 			{'}', lexer::RBRACE},
 			{',', lexer::COMMA},
+			{'=', lexer::EQ},
 		};
 		std::set<std::string> keywords = {
-			"extern", "global", "routine", "call"
+			"extern", "global", "routine", "let"
 		};
 		std::string src;
 		int ptr = 0;

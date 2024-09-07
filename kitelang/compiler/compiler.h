@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <map>
 #include "../parser/parser.h"
 
 namespace compiler {
@@ -16,13 +17,22 @@ namespace compiler {
 		std::vector<std::string> textSection;
 		void visit_node(std::shared_ptr<parser::Node>, std::string = "");
 		void visit_root(std::shared_ptr<parser::RootNode>);
+		void visit_root_with_scope(std::shared_ptr<parser::RootNode>);
 		void visit_int_lit(std::shared_ptr<parser::IntLitNode>, std::string);
+		void visit_var(std::shared_ptr<parser::VarNode>, std::string);
 		void visit_string_lit(std::shared_ptr<parser::StringLitNode>, std::string);
-		void visit_call(std::shared_ptr<parser::CallNode>);
+		void visit_call(std::shared_ptr<parser::CallNode>, std::string);
 		void visit_extern(std::shared_ptr<parser::ExternNode>);
 		void visit_global(std::shared_ptr<parser::GlobalNode>);
 		void visit_routine(std::shared_ptr<parser::RoutineNode>);
+		void visit_let(std::shared_ptr<parser::LetNode>);
 		void visit_binop(std::shared_ptr<parser::BinOpNode>, std::string);
+
+		std::map<std::string, int> vars {};
+		int stacksize = 0;
+		void push(std::string);
+		void pop(std::string);
+		void pop();
 	public:
 		Compiler(std::shared_ptr<parser::RootNode> r) : root(r), dataSectionCount(0) {}
 		void codegen();

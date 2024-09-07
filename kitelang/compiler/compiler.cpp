@@ -8,12 +8,15 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	switch (node->type) {
 	case parser::EXTERN: return visit_extern(std::static_pointer_cast<parser::ExternNode>(node));
 	case parser::GLOBAL: return visit_global(std::static_pointer_cast<parser::GlobalNode>(node));
-	case parser::CALL: return visit_call(std::static_pointer_cast<parser::CallNode>(node));
+	case parser::CALL: return visit_call(std::static_pointer_cast<parser::CallNode>(node), reg);
 	case parser::ROUTINE: return visit_routine(std::static_pointer_cast<parser::RoutineNode>(node));
 	case parser::INT_LIT: return visit_int_lit(std::static_pointer_cast<parser::IntLitNode>(node), reg);
 	case parser::STRING_LIT: return visit_string_lit(std::static_pointer_cast<parser::StringLitNode>(node), reg);
+	case parser::VAR: return visit_var(std::static_pointer_cast<parser::VarNode>(node), reg);
 	case parser::BINOP: return visit_binop(std::static_pointer_cast<parser::BinOpNode>(node), reg);
-	default: throw std::runtime_error("yet unsupported keyword");
+	case parser::LET: return visit_let(std::static_pointer_cast<parser::LetNode>(node));
+	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
+	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
 
@@ -23,8 +26,25 @@ void compiler::Compiler::visit_root(std::shared_ptr<parser::RootNode> node) {
 	}
 }
 
+void compiler::Compiler::visit_root_with_scope(std::shared_ptr<parser::RootNode> node) {
+	textSection.push_back("; SCOPE START");
+	int oldStackSize = stacksize;
+	for (std::shared_ptr<parser::Node> n : node->statements) {
+		visit_node(n);
+	}
+	textSection.push_back("; SCOPE END");
+	for (int i = stacksize; i > oldStackSize; i--) {
+		pop();
+	}
+	textSection.push_back("; SCOPE VALUES DISCARDED");
+}
+
 void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node, std::string reg) {
 	textSection.push_back("mov " + reg + ", " + std::to_string(node->value));
+}
+
+void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
+	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string((stacksize - 1 - vars[node->name]) * 8) + "]");
 }
 
 void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode> node, std::string reg) {
@@ -33,14 +53,17 @@ void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode>
 	++dataSectionCount;
 }
 
-void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node) {
-	for (int i = node->args.size(); i < 6; i++) {
-		textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
-	}
+void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std::string reg) {
+	// for (int i = node->args.size(); i < 6; i++) {
+	//	 textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
+	// }
 	for (int i = 0; i < node->args.size(); i++) {
 		visit_node(node->args[i], argregs[i]);
 	}
 	textSection.push_back("call " + node->routine);
+
+	if (reg != "rax" && reg != "")
+		textSection.push_back("mov " + reg + ", rax");
 }
 
 void compiler::Compiler::visit_extern(std::shared_ptr<parser::ExternNode> node) {
@@ -57,6 +80,12 @@ void compiler::Compiler::visit_routine(std::shared_ptr<parser::RoutineNode> node
 	textSection.push_back("ret");
 }
 
+void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
+	visit_node(node->root, "rax");
+	vars[node->name] = stacksize;
+	push("rax");
+}
+
 // this part is kinda complicated
 void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, std::string reg) {
 	// Check operator precedence
@@ -69,9 +98,9 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			auto right_binop = std::static_pointer_cast<parser::BinOpNode>(node->right);
 			if (right_binop->operation == lexer::MUL || right_binop->operation == lexer::DIV) {
 				// Temporarily store the result of the left side
-				textSection.push_back("push rax");
+				push("rax");
 				visit_binop(right_binop, "rax");  // Evaluate the right child expression first
-				textSection.push_back("pop rbx"); // Restore the left-hand side
+				pop("rbx"); // Restore the left-hand side
 			}
 			else {
 				visit_node(node->right, "rbx");  // Direct evaluation for non-precedence cases
@@ -105,4 +134,19 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 
 	// Store the result in the appropriate register
 	textSection.push_back("mov " + reg + ", rax");
+}
+
+void compiler::Compiler::push(std::string reg) {
+	textSection.push_back("push " + reg);
+	stacksize++;
+}
+
+void compiler::Compiler::pop(std::string reg) {
+	textSection.push_back("pop " + reg);
+	stacksize--;
+}
+
+void compiler::Compiler::pop() {
+	textSection.push_back("add rsp, 8");
+	stacksize--;
 }

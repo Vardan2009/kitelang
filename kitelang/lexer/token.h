@@ -16,6 +16,7 @@ namespace lexer {
 		MUL,
 		DIV,
 		COMMA,
+		EQ
 	} token_t;
 
 	class Token {

@@ -15,6 +15,8 @@ namespace parser {
 		GLOBAL,
 		ROUTINE,
 		CALL,
+		LET,
+		VAR
 	} node_t;
 	class Node {
 	public:
@@ -127,6 +129,32 @@ namespace parser {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << "routine " << name << std::endl;
 			root->print(indent + 1);
+		}
+	};
+	class LetNode : public Node {
+	public:
+		std::string name;
+		std::shared_ptr<Node> root;
+		LetNode(std::string rout, std::shared_ptr<Node> rt)
+			: name(rout), root(rt) {
+			type = LET;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "let " << name << std::endl;
+			root->print(indent + 1);
+		}
+	};
+	class VarNode : public Node {
+	public:
+		std::string name;
+		VarNode(std::string rout)
+			: name(rout) {
+			type = VAR;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << name << std::endl;
 		}
 	};
 }
