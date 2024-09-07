@@ -3,12 +3,14 @@ extern exit
 global main
 
 routine main {
-	let y = 20
-	{
-		let x = 5
-		printf("%d", x)
-	}
-	let x = 10
-	printf("%d and %d", x, y)
-	exit(0)
+    {
+        let x = 20
+        printf("%d", x) % 20
+        {
+            let y = 69
+            printf("%d %d", x, y)
+        }
+        % printf("%d", y) returns error!
+    }
+    % printf("%d", x) same for here!
 }

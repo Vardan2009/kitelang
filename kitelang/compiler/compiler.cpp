@@ -28,6 +28,7 @@ void compiler::Compiler::visit_root(std::shared_ptr<parser::RootNode> node) {
 
 void compiler::Compiler::visit_root_with_scope(std::shared_ptr<parser::RootNode> node) {
 	textSection.push_back("; SCOPE START");
+	std::map<std::string, int> oldvars(vars);
 	int oldStackSize = stacksize;
 	for (std::shared_ptr<parser::Node> n : node->statements) {
 		visit_node(n);
@@ -36,6 +37,7 @@ void compiler::Compiler::visit_root_with_scope(std::shared_ptr<parser::RootNode>
 	for (int i = stacksize; i > oldStackSize; i--) {
 		pop();
 	}
+	vars = oldvars;
 	textSection.push_back("; SCOPE VALUES DISCARDED");
 }
 
@@ -44,6 +46,8 @@ void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node,
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
+	if (vars.find(node->name) == vars.end())
+		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string((stacksize - 1 - vars[node->name]) * 8) + "]");
 }
 
