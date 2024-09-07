@@ -144,7 +144,8 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 	}
 
 	// Store the result in the appropriate register
-	textSection.push_back("mov " + reg + ", rax");
+	if(node->operation != lexer::EQ)
+		textSection.push_back("mov " + reg + ", rax");
 }
 
 int compiler::Compiler::get_variable_offset(std::string varname) {
