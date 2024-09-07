@@ -48,7 +48,7 @@ void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node,
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
 	if (vars.find(node->name) == vars.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
-	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string((stacksize - 1 - vars[node->name]) * 8) + "]");
+	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
 
 void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode> node, std::string reg) {
@@ -135,9 +135,20 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			textSection.push_back("idiv rbx");
 		}
 	}
+	else if (node->operation == lexer::EQ) { // if the operation is assignment <varname> = <expr>
+		visit_node(node->right, "rax"); // store the new value in rax
+		if (node->left->type != parser::VAR)
+			throw std::runtime_error("LHS of assignment should be variable");
+
+		textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], rax"); // move the result from rax to the stack
+	}
 
 	// Store the result in the appropriate register
 	textSection.push_back("mov " + reg + ", rax");
+}
+
+int compiler::Compiler::get_variable_offset(std::string varname) {
+	return (stacksize - 1 - vars[varname]) * 8;
 }
 
 void compiler::Compiler::push(std::string reg) {

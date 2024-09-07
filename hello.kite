@@ -8,14 +8,8 @@ extern exit
 global main
 
 routine main {
-    {
-        let x = 20
-        printf("%d", x) % 20
-        {
-            let y = 69
-            printf("%d %d", x, y)
-        }
-        % printf("%d", y) returns error!
-    }
-    % printf("%d", x) same for here!
+    let x = 10
+    x = x + 20
+    printf("%d", x)
+    exit(0)
 }

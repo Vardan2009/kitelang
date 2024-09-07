@@ -28,6 +28,8 @@ namespace compiler {
 		void visit_let(std::shared_ptr<parser::LetNode>);
 		void visit_binop(std::shared_ptr<parser::BinOpNode>, std::string);
 
+		int get_variable_offset(std::string);
+
 		std::map<std::string, int> vars {};
 		int stacksize = 0;
 		void push(std::string);
