@@ -12,8 +12,8 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 			result.push_back(make_string());
 		else if (specials.count(src[ptr]))
 			result.push_back(make_special());
-		else if (src[ptr] == '%')
-			skip_comment();
+		else if (src[ptr] == '%') skip_comment();
+		else if (src[ptr] == '~') skip_multiline_comment();
 		else if (isspace(src[ptr])) ++ptr;
 		else
 			throw std::runtime_error("invalid character `" + std::to_string(src[ptr]) + "`");
@@ -60,8 +60,14 @@ token_ptr lexer::Lexer::make_special() {
 }
 
 void lexer::Lexer::skip_comment() {
-	while (src[ptr] != '\n') {
+	while (src[ptr] != '\n' && ptr < src.size()) {
 		ptr++;
 	}
 	ptr++;
+}
+
+void lexer::Lexer::skip_multiline_comment() {
+	++ptr;
+	while (ptr < src.size())
+		if (src[ptr++] == '~') break;
 }

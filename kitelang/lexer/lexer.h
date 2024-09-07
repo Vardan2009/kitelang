@@ -34,6 +34,7 @@ namespace lexer {
 		token_ptr make_identifier();
 		token_ptr make_special();
 		void skip_comment();
+		void skip_multiline_comment();
 	public:
 		Lexer(std::string src) {
 			this->src = src;

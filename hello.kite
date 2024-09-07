@@ -1,3 +1,8 @@
+~
+Kite programming language
+This is a multiline comment
+~
+% This is a single line comment
 extern printf
 extern exit
 global main
