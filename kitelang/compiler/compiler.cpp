@@ -80,7 +80,7 @@ void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) 
 
 void compiler::Compiler::visit_routine(std::shared_ptr<parser::RoutineNode> node) {
 	textSection.push_back(node->name + ":");
-	visit_root(node->root);
+	visit_root_with_scope(node->root);
 	textSection.push_back("ret");
 }
 
