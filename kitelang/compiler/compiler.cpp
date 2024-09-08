@@ -16,6 +16,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::BINOP: return visit_binop(std::static_pointer_cast<parser::BinOpNode>(node), reg);
 	case parser::LET: return visit_let(std::static_pointer_cast<parser::LetNode>(node));
 	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
+	case parser::CMP: return visit_cmp(std::static_pointer_cast<parser::CmpNode>(node));
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -82,6 +83,26 @@ void compiler::Compiler::visit_routine(std::shared_ptr<parser::RoutineNode> node
 	textSection.push_back(node->name + ":");
 	visit_root_with_scope(node->root);
 	textSection.push_back("ret");
+}
+
+void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
+	visit_node(node->val1, "rax");
+	visit_node(node->val2, "rbx");
+	textSection.push_back("cmp rax, rbx");
+	int id = cmpLabelCount++;
+	for (std::map<std::string, std::shared_ptr<parser::RootNode>>::const_iterator iter = node->comparisons.begin(); iter != node->comparisons.end(); ++iter) {
+		std::string k = iter->first;
+		textSection.push_back(cmpkeywordinstruction[k] + " " + k + "_block_" + std::to_string(id));
+	}
+	for (std::map<std::string, std::shared_ptr<parser::RootNode>>::const_iterator iter = node->comparisons.begin(); iter != node->comparisons.end(); ++iter) {
+		std::string k = iter->first;
+		std::shared_ptr<parser::RootNode> root = iter->second;
+		textSection.push_back(k + "_block_" + std::to_string(id) + ":");
+		visit_node(root);
+		textSection.push_back("jmp end_" + std::to_string(id));
+	}
+	textSection.push_back("end_" + std::to_string(id) + ": ");
+
 }
 
 void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {

@@ -9,7 +9,13 @@ global main
 
 routine main {
     let x = 10
-    x = x + 20
-    printf("%d", x)
+    cmp x, 10 {
+        eq {
+            printf("x is 10")
+        }
+        neq {
+            printf("x is other than 10")
+        }
+    }
     exit(0)
 }

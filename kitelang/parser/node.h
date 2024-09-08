@@ -2,6 +2,7 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <map>
 
 #include "../lexer/token.h"
 
@@ -16,7 +17,8 @@ namespace parser {
 		ROUTINE,
 		CALL,
 		LET,
-		VAR
+		VAR,
+		CMP
 	} node_t;
 	class Node {
 	public:
@@ -155,6 +157,27 @@ namespace parser {
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << name << std::endl;
+		}
+	};
+	class CmpNode : public Node {
+	public:
+		std::shared_ptr<Node> val1, val2;
+		std::map<std::string, std::shared_ptr<RootNode>> comparisons;
+		CmpNode(std::shared_ptr<Node> val1, std::shared_ptr<Node> val2, std::map<std::string, std::shared_ptr<RootNode>> comparisons)
+			: val1(val1), val2(val2), comparisons(comparisons) {
+			type = CMP;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "cmp" << std::endl;
+			val1->print(indent + 1);
+			val2->print(indent + 1);
+			for (std::map<std::string, std::shared_ptr<RootNode>>::const_iterator iter = comparisons.begin(); iter != comparisons.end(); ++iter) {
+				std::string k = iter->first;
+				std::shared_ptr<RootNode> v = iter->second;
+				for (int i = 0; i < indent + 2; i++) std::cout << "--"; std::cout << ' ' << k << std::endl;
+				v->print(indent + 3);
+			}
 		}
 	};
 }

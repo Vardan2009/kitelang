@@ -15,6 +15,7 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "global" && peek()->type == lexer::KEYWORD) return global_node();
 	if (stmt == "extern" && peek()->type == lexer::KEYWORD) return extern_node();
 	if (stmt == "routine" && peek()->type == lexer::KEYWORD) return routine_node();
+	if (stmt == "cmp" && peek()->type == lexer::KEYWORD) return cmp_node();
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (peek()->type == lexer::LBRACE) return statement_list();
 	return expr();
@@ -90,6 +91,23 @@ std::shared_ptr<parser::RoutineNode> parser::Parser::routine_node() {
 	std::string name = advance()->value_str;
 	std::shared_ptr<RootNode> root = statement_list();
 	return std::make_shared<RoutineNode>(name, root);
+}
+
+std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {
+	consume(lexer::KEYWORD, "cmp");
+	std::shared_ptr<Node> val1 = expr();
+	consume(lexer::COMMA);
+	std::shared_ptr<Node> val2 = expr();
+	consume(lexer::LBRACE);
+	std::map<std::string, std::shared_ptr<RootNode>> comparisons {};
+	while (peek()->type != lexer::RBRACE) {
+		if (peek()->type != lexer::KEYWORD)
+			throw std::runtime_error("expected a comparison result keyword at cmp block!");
+		std::string key = advance()->value_str;
+		comparisons[key] = statement_list();
+	}
+	consume(lexer::RBRACE);
+	return std::make_shared<CmpNode>(val1, val2, comparisons);
 }
 
 std::shared_ptr<parser::LetNode> parser::Parser::let_node() {

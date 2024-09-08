@@ -10,6 +10,11 @@ namespace compiler {
 	class Compiler {
 	private:
 		std::string argregs[6] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
+		std::map<std::string, std::string> cmpkeywordinstruction = {
+			{"eq", "je"},
+			{"neq", "jne"},
+		};
+		int cmpLabelCount = 0;
 		int dataSectionCount = 0;
 		std::string tab = "    ";
 		std::shared_ptr<parser::RootNode> root;
@@ -25,6 +30,7 @@ namespace compiler {
 		void visit_extern(std::shared_ptr<parser::ExternNode>);
 		void visit_global(std::shared_ptr<parser::GlobalNode>);
 		void visit_routine(std::shared_ptr<parser::RoutineNode>);
+		void visit_cmp(std::shared_ptr<parser::CmpNode>);
 		void visit_let(std::shared_ptr<parser::LetNode>);
 		void visit_binop(std::shared_ptr<parser::BinOpNode>, std::string);
 
