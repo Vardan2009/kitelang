@@ -9,8 +9,17 @@ global _start
 
 % the entry point
 routine _start {
+    let x = 5 * 2 + 1
+    let y = x
     % call kprint and kexit routines
-    kprint("Hello World!", 13)
+    cmp x, y {
+        eq {
+            kprint("x = y", 6)
+        }
+        neq {
+            kprint("x != y", 7)
+        }
+    }
     kexit(0)
 }
 
