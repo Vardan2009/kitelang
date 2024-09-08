@@ -3,20 +3,41 @@ Kite programming language
 This is a multiline comment
 ~
 % This is a single line comment
-extern printf
-extern exit
-global main
 
-routine main {
-    let x = 10
-    asm "; this is inserted through asm keyword"
-    cmp x, 10 {
-        eq {
-            printf("x is 10")
-        }
-        neq {
-            printf("x is other than 10")
-        }
-    }
-    exit(0)
+% make the start routine visible to the linker
+global _start
+
+% the entry point
+routine _start {
+    % call kprint and kexit routines
+    kprint("Hello World!", 13)
+    kexit(0)
+}
+
+~
+kprint function
+args:
+    the pointer to the string (stored in rdi)
+    the length to print       (stored in rsi)
+usage example:
+    kprint("Hello World!", 13)
+~
+routine kprint {
+    asm "mov rdx, rsi"
+    asm "mov rsi, rdi"
+    asm "mov rax, 1"
+    asm "mov rdi, 1"
+    asm "syscall"
+}
+
+~
+kexit function
+args:
+    the exit code (stored in rdi)
+usage example:
+    kexit(0)
+~
+routine kexit {
+    asm "mov rax, 60"
+    asm "syscall"
 }

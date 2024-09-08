@@ -4,7 +4,7 @@
 std::vector<token_ptr> lexer::Lexer::tokenize() {
 	std::vector<token_ptr> result;
 	while (ptr < src.size()) {
-		if (isalpha(src[ptr]))
+		if (isalpha(src[ptr]) || src[ptr] == '_')
 			result.push_back(make_identifier());
 		else if (isdigit(src[ptr]))
 			result.push_back(make_int());
@@ -23,7 +23,7 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 
 token_ptr lexer::Lexer::make_identifier() {
 	std::string result;
-	while (isalnum(src[ptr])) {
+	while (isalnum(src[ptr]) || src[ptr] == '_') {
 		result += src[ptr++];
 	}
 
