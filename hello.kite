@@ -9,6 +9,8 @@ global _start
 
 % the entry point
 routine _start {
+    kprint("Hello, Kite!") % print message!
+    kprintc(itoc(10))      % escape characters like \n aren't implemented yet so this is the only way to print a newline
     % printing the alphabet (AaBbCc...)
     % the ascii values for the A-Z characters range from 65 to 90 inclusive (90 is Z)
     % and each corresponding lowercase letter has a +32 offset (so 65 is `A`, (65 + 32) is `a`)
