@@ -19,7 +19,8 @@ namespace parser {
 		LET,
 		VAR,
 		CMP,
-		ASM
+		ASM,
+		FOR
 	} node_t;
 	class Node {
 	public:
@@ -190,6 +191,23 @@ namespace parser {
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << "asm <" << content << ">" << std::endl;
+		}
+	};
+	class ForNode : public Node {
+	public:
+		std::string itername;
+		std::shared_ptr<Node> root, initVal, targetVal, stepVal;
+		ForNode(std::string itername, std::shared_ptr<Node> root, std::shared_ptr<Node> initVal, std::shared_ptr<Node> targetVal, std::shared_ptr<Node> stepVal)
+			: itername(itername), root(root), initVal(initVal), targetVal(targetVal), stepVal(stepVal) {
+			type = FOR;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "for " << itername << std::endl;
+			initVal->print(indent + 1);
+			targetVal->print(indent + 1);
+			stepVal->print(indent + 1);
+			root->print(indent + 1);
 		}
 	};
 }

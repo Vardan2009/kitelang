@@ -18,6 +18,7 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "cmp" && peek()->type == lexer::KEYWORD) return cmp_node();
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
+	if (stmt == "for" && peek()->type == lexer::KEYWORD) return for_node();
 	if (peek()->type == lexer::LBRACE) return statement_list();
 	return expr();
 }
@@ -114,6 +115,19 @@ std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {
 std::shared_ptr<parser::AsmNode> parser::Parser::asm_node() {
 	consume(lexer::KEYWORD, "asm");
 	return std::make_shared<AsmNode>(advance()->value_str);
+}
+
+std::shared_ptr<parser::ForNode> parser::Parser::for_node() {
+	consume(lexer::KEYWORD, "for");
+	std::string itername = advance()->value_str;
+	consume(lexer::EQ);
+	std::shared_ptr<Node> initVal = expr();
+	consume(lexer::KEYWORD, "to");
+	std::shared_ptr<Node> targetVal = expr();
+	consume(lexer::KEYWORD, "step");
+	std::shared_ptr<Node> stepVal = expr();
+	std::shared_ptr<Node> root = statement();
+	return std::make_shared<ForNode>(itername, root, initVal, targetVal, stepVal);
 }
 
 std::shared_ptr<parser::LetNode> parser::Parser::let_node() {

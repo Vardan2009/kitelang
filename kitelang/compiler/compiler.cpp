@@ -18,6 +18,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
 	case parser::CMP: return visit_cmp(std::static_pointer_cast<parser::CmpNode>(node));
 	case parser::ASM: return visit_asm(std::static_pointer_cast<parser::AsmNode>(node));
+	case parser::FOR: return visit_for(std::static_pointer_cast<parser::ForNode>(node));
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -108,6 +109,32 @@ void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 
 void compiler::Compiler::visit_asm(std::shared_ptr<parser::AsmNode> node) {
 	textSection.push_back(node->content);
+}
+
+void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
+	int id = cmpLabelCount++;
+	std::map<std::string, int> oldvars(vars);
+
+	visit_node(node->initVal, "rax");
+	int oldStackSize = stacksize;
+	vars[node->itername] = stacksize;
+	push("rax");
+
+	textSection.push_back("forloop_" + std::to_string(id) + ":");
+	if (node->type == parser::ROOT) visit_root(std::static_pointer_cast<parser::RootNode>(node->root));
+	else visit_node(node->root);
+
+	visit_node(node->stepVal, "rax");
+	textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
+	visit_node(node->targetVal, "rax");
+	textSection.push_back("cmp [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
+	textSection.push_back("jg forloop_end_" + std::to_string(id));
+	textSection.push_back("jmp forloop_" + std::to_string(id));
+	textSection.push_back("forloop_end_" + std::to_string(id) + ": ");
+	for (int i = stacksize; i > oldStackSize; i--) {
+		pop();
+	}
+	vars = oldvars;
 }
 
 void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {

@@ -9,16 +9,13 @@ global _start
 
 % the entry point
 routine _start {
-    let x = 5 * 2 + 1
-    let y = x
-    % call kprint and kexit routines
-    cmp x, y {
-        eq {
-            kprint("x = y", 6)
-        }
-        neq {
-            kprint("x != y", 7)
-        }
+    % printing the alphabet (AaBbCc...)
+    % the ascii values for the A-Z characters range from 65 to 90 inclusive (90 is Z)
+    % and each corresponding lowercase letter has a +32 offset (so 65 is `A`, (65 + 32) is `a`)
+    % for loops yipeee
+    for i = 65 to 90 step 1 {
+        kprint(itoc(i), 2)
+        kprint(itoc(i + 32), 2)
     }
     kexit(0)
 }
@@ -49,4 +46,18 @@ usage example:
 routine kexit {
     asm "mov rax, 60"
     asm "syscall"
+}
+
+~
+itoc function
+args:
+    the ASCII integer (stored in rdi)
+usage exmaple:
+    itoc(65) % 'A'
+~
+routine itoc {
+    asm "sub rsp, 8"  
+    asm "mov byte [rsp], dil"
+    asm "lea rax, [rsp]"
+    asm "add rsp, 8"  
 }
