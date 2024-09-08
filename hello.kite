@@ -9,6 +9,7 @@ global main
 
 routine main {
     let x = 10
+    asm "; this is inserted through asm keyword"
     cmp x, 10 {
         eq {
             printf("x is 10")

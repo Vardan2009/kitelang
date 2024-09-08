@@ -17,6 +17,7 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "routine" && peek()->type == lexer::KEYWORD) return routine_node();
 	if (stmt == "cmp" && peek()->type == lexer::KEYWORD) return cmp_node();
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
+	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
 	if (peek()->type == lexer::LBRACE) return statement_list();
 	return expr();
 }
@@ -108,6 +109,11 @@ std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {
 	}
 	consume(lexer::RBRACE);
 	return std::make_shared<CmpNode>(val1, val2, comparisons);
+}
+
+std::shared_ptr<parser::AsmNode> parser::Parser::asm_node() {
+	consume(lexer::KEYWORD, "asm");
+	return std::make_shared<AsmNode>(advance()->value_str);
 }
 
 std::shared_ptr<parser::LetNode> parser::Parser::let_node() {

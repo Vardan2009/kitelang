@@ -17,6 +17,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::LET: return visit_let(std::static_pointer_cast<parser::LetNode>(node));
 	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
 	case parser::CMP: return visit_cmp(std::static_pointer_cast<parser::CmpNode>(node));
+	case parser::ASM: return visit_asm(std::static_pointer_cast<parser::AsmNode>(node));
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -103,6 +104,10 @@ void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 	}
 	textSection.push_back("end_" + std::to_string(id) + ": ");
 
+}
+
+void compiler::Compiler::visit_asm(std::shared_ptr<parser::AsmNode> node) {
+	textSection.push_back(node->content);
 }
 
 void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {

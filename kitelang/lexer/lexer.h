@@ -25,7 +25,7 @@ namespace lexer {
 			{'=', lexer::EQ},
 		};
 		std::set<std::string> keywords = {
-			"extern", "global", "routine", "let", "cmp", "eq", "neq"
+			"extern", "global", "routine", "let", "cmp", "asm", "eq", "neq"
 		};
 		std::string src;
 		int ptr = 0;

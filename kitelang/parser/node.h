@@ -18,7 +18,8 @@ namespace parser {
 		CALL,
 		LET,
 		VAR,
-		CMP
+		CMP,
+		ASM
 	} node_t;
 	class Node {
 	public:
@@ -178,6 +179,17 @@ namespace parser {
 				for (int i = 0; i < indent + 2; i++) std::cout << "--"; std::cout << ' ' << k << std::endl;
 				v->print(indent + 3);
 			}
+		}
+	};
+	class AsmNode : public Node {
+	public:
+		std::string content;
+		AsmNode(std::string content) : content(content) {
+			type = ASM;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "asm <" << content << ">" << std::endl;
 		}
 	};
 }

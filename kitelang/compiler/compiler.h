@@ -31,6 +31,7 @@ namespace compiler {
 		void visit_global(std::shared_ptr<parser::GlobalNode>);
 		void visit_routine(std::shared_ptr<parser::RoutineNode>);
 		void visit_cmp(std::shared_ptr<parser::CmpNode>);
+		void visit_asm(std::shared_ptr<parser::AsmNode>);
 		void visit_let(std::shared_ptr<parser::LetNode>);
 		void visit_binop(std::shared_ptr<parser::BinOpNode>, std::string);
 
