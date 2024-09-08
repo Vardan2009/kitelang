@@ -31,6 +31,7 @@ namespace lexer {
 		int ptr = 0;
 		token_ptr make_int();
 		token_ptr make_string();
+		token_ptr make_char();
 		token_ptr make_identifier();
 		token_ptr make_special();
 		void skip_comment();

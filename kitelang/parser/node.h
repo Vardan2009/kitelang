@@ -12,6 +12,7 @@ namespace parser {
 		BINOP,
 		STRING_LIT,
 		INT_LIT,
+		CHAR_LIT,
 		EXTERN,
 		GLOBAL,
 		ROUTINE,
@@ -55,6 +56,18 @@ namespace parser {
 			std::cout << operation << std::endl;
 			left->print(indent + 1);
 			right->print(indent + 1);
+		}
+	};
+	class CharLitNode : public Node {
+	public:
+		char value;
+		CharLitNode(char val)
+			: value(val) {
+			type = CHAR_LIT;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << value << std::endl;
 		}
 	};
 	class StringLitNode : public Node {

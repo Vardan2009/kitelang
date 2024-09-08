@@ -10,6 +10,8 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 			result.push_back(make_int());
 		else if (src[ptr] == '"')
 			result.push_back(make_string());
+		else if (src[ptr] == '\'')
+			result.push_back(make_char());
 		else if (specials.count(src[ptr]))
 			result.push_back(make_special());
 		else if (src[ptr] == '%') skip_comment();
@@ -51,6 +53,13 @@ token_ptr lexer::Lexer::make_string() {
 	}
 	ptr++;
 	return std::make_shared<Token>(STRING_LIT, result);
+}
+
+token_ptr lexer::Lexer::make_char() {
+	ptr++;
+	char result = src[ptr++];
+	ptr++;
+	return std::make_shared<Token>(CHAR_LIT, result);
 }
 
 token_ptr lexer::Lexer::make_special() {

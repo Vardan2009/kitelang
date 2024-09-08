@@ -7,6 +7,7 @@ namespace lexer {
 		IDENTIFIER,
 		STRING_LIT,
 		INT_LIT,
+		CHAR_LIT,
 		LBRACE,
 		RBRACE,
 		LPAREN,

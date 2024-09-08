@@ -54,6 +54,8 @@ std::shared_ptr<parser::Node> parser::Parser::factor() {
 		return std::make_shared<IntLitNode>(advance()->value);
 	if (peek()->type == lexer::STRING_LIT)
 		return std::make_shared<StringLitNode>(advance()->value_str);
+	if (peek()->type == lexer::CHAR_LIT)
+		return std::make_shared<CharLitNode>((char)advance()->value);
 	if (peek()->type == lexer::LPAREN) {
 		consume(lexer::LPAREN);
 		std::shared_ptr<parser::Node> n = expr();
