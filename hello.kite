@@ -42,7 +42,7 @@ kprint function
 args:
     the pointer to the string (stored in rdi)
 usage example:
-    kprint("Hello World!", 13)
+    kprint("Hello World!")
 ~
 routine kprint {
     asm "push rdi"
