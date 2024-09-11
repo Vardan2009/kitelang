@@ -27,7 +27,7 @@ kprintc function
 args:
     the character (stored in rdi)
 usage example:
-    kprint('V')
+    kprintc('V')
 ~
 routine kprintc {
     asm "mov rdx, 1"
