@@ -1,25 +1,14 @@
-~
-Kite programming language
-This is a multiline comment
-~
-% This is a single line comment
-
-% make the start routine visible to the linker
 global _start
 
-% the entry point
-routine _start {
-    kprint("Hello, Kite!") % print message!
-    kprintc(itoc(10))      % escape characters like \n aren't implemented yet so this is the only way to print a newline
-    % printing the alphabet (AaBbCc...)
-    % the ascii values for the A-Z characters range from 65 to 90 inclusive (90 is Z)
-    % and each corresponding lowercase letter has a +32 offset (so 65 is `A`, (65 + 32) is `a`)
-    % for loops yipeee
-    for i = 65 to 90 step 1 {
-        kprintc(itoc(i))
-        kprintc(itoc(i + 32))
+fn _start() {
+	for i = 0 to 25 step 1 {
+        kprintc(itoc(add(65,i)))
     }
     kexit(0)
+}
+
+fn add(a, b) {
+	return a + b
 }
 
 ~
@@ -27,41 +16,14 @@ kprintc function
 args:
     the character (stored in rdi)
 usage example:
-    kprint('V')
+    kprintc('V')
 ~
-routine kprintc {
+fn kprintc() {
     asm "mov rdx, 1"
     asm "mov rsi, rdi"
     asm "mov rax, 1"
     asm "mov rdi, 1"
     asm "syscall"
-}
-
-~
-kprint function
-args:
-    the pointer to the string (stored in rdi)
-usage example:
-    kprint("Hello World!", 13)
-~
-routine kprint {
-    asm "push rdi"
-    asm "mov rax, 1"
-    asm "mov rdi, 1"
-    asm ".kprint_loop:"
-    asm "    mov rsi, [rsp]"
-    asm "    movzx rdx, byte [rsi]"
-    asm "    test rdx, rdx"
-    asm "    jz .kprint_done"
-    asm "    mov rax, 1"
-    asm "    mov rdi, 1"
-    asm "    mov rdx, 1"
-    asm "    syscall"
-    asm "    inc rsi"
-    asm "    mov [rsp], rsi"
-    asm "    jmp .kprint_loop"
-    asm ".kprint_done:"
-    asm "    pop rdi"
 }
 
 ~
@@ -71,7 +33,7 @@ args:
 usage example:
     kexit(0)
 ~
-routine kexit {
+fn kexit() {
     asm "mov rax, 60"
     asm "syscall"
 }
@@ -83,7 +45,7 @@ args:
 usage exmaple:
     itoc(65) % 'A'
 ~
-routine itoc {
+fn itoc() {
     asm "sub rsp, 8"  
     asm "mov byte [rsp], dil"
     asm "lea rax, [rsp]"

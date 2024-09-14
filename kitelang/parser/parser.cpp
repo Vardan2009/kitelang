@@ -14,7 +14,8 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	std::string stmt = peek()->value_str;
 	if (stmt == "global" && peek()->type == lexer::KEYWORD) return global_node();
 	if (stmt == "extern" && peek()->type == lexer::KEYWORD) return extern_node();
-	if (stmt == "routine" && peek()->type == lexer::KEYWORD) return routine_node();
+	if (stmt == "fn" && peek()->type == lexer::KEYWORD) return fn_node();
+	if (stmt == "return" && peek()->type == lexer::KEYWORD) return return_node();
 	if (stmt == "cmp" && peek()->type == lexer::KEYWORD) return cmp_node();
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
@@ -89,12 +90,26 @@ std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 	return std::make_shared<ExternNode>(advance()->value_str);
 }
 
+std::shared_ptr<parser::ReturnNode> parser::Parser::return_node() {
+	consume(lexer::KEYWORD, "return");
+	return std::make_shared<ReturnNode>(expr());
+}
 
-std::shared_ptr<parser::RoutineNode> parser::Parser::routine_node() {
-	consume(lexer::KEYWORD, "routine");
+std::shared_ptr<parser::FnNode> parser::Parser::fn_node() {
+	consume(lexer::KEYWORD, "fn");
 	std::string name = advance()->value_str;
+	std::vector <std::string> argnames {};
+	consume(lexer::LPAREN);
+	while (peek()->type != lexer::RPAREN) {
+		if (peek()->type != lexer::IDENTIFIER)
+			throw std::runtime_error("expected an identifier");
+		argnames.push_back(advance()->value_str);
+		if (peek()->type == lexer::RPAREN) break;
+		consume(lexer::COMMA);
+	}
+	consume(lexer::RPAREN);
 	std::shared_ptr<RootNode> root = statement_list();
-	return std::make_shared<RoutineNode>(name, root);
+	return std::make_shared<FnNode>(name, argnames, root);
 }
 
 std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {

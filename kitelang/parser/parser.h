@@ -14,7 +14,8 @@ namespace parser {
 
 		std::shared_ptr<GlobalNode> global_node();
 		std::shared_ptr<ExternNode> extern_node();
-		std::shared_ptr<RoutineNode> routine_node();
+		std::shared_ptr<FnNode> fn_node();
+		std::shared_ptr<ReturnNode> return_node();
 		std::shared_ptr<CmpNode> cmp_node();
 		std::shared_ptr<AsmNode> asm_node();
 		std::shared_ptr<ForNode> for_node();

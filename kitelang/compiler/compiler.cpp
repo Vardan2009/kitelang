@@ -9,7 +9,8 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::EXTERN: return visit_extern(std::static_pointer_cast<parser::ExternNode>(node));
 	case parser::GLOBAL: return visit_global(std::static_pointer_cast<parser::GlobalNode>(node));
 	case parser::CALL: return visit_call(std::static_pointer_cast<parser::CallNode>(node), reg);
-	case parser::ROUTINE: return visit_routine(std::static_pointer_cast<parser::RoutineNode>(node));
+	case parser::FN: return visit_fn(std::static_pointer_cast<parser::FnNode>(node));
+	case parser::RETURN: return visit_return(std::static_pointer_cast<parser::ReturnNode>(node));
 	case parser::INT_LIT: return visit_int_lit(std::static_pointer_cast<parser::IntLitNode>(node), reg);
 	case parser::CHAR_LIT: return visit_char_lit(std::static_pointer_cast<parser::CharLitNode>(node), reg);
 	case parser::STRING_LIT: return visit_string_lit(std::static_pointer_cast<parser::StringLitNode>(node), reg);
@@ -88,9 +89,26 @@ void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) 
 	textSection.push_back("global " + node->routine);
 }
 
-void compiler::Compiler::visit_routine(std::shared_ptr<parser::RoutineNode> node) {
+void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) {
+	visit_node(node->value, "rax");
+	textSection.push_back("jmp ." + curFn + "_end");
+}
+
+void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
+	curFn = node->name;
 	textSection.push_back(node->name + ":");
+	std::map<std::string, int> oldvars(vars);
+	for (int i = 0; i < node->argnames.size(); i++) {
+		vars[node->argnames[i]] = stacksize;
+		push(argregs[i]);
+	}
 	visit_root_with_scope(node->root);
+	textSection.push_back("." + node->name + "_end:");
+	for (int i = 0; i < node->argnames.size(); i++) {
+		pop();
+	}
+	curFn = "";
+	vars = oldvars;
 	textSection.push_back("ret");
 }
 

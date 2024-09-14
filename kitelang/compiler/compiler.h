@@ -14,6 +14,7 @@ namespace compiler {
 			{"eq", "je"},
 			{"neq", "jne"},
 		};
+		std::string curFn; // the current function the compiler is inside
 		int cmpLabelCount = 0;
 		int dataSectionCount = 0;
 		std::string tab = "    ";
@@ -30,7 +31,8 @@ namespace compiler {
 		void visit_call(std::shared_ptr<parser::CallNode>, std::string);
 		void visit_extern(std::shared_ptr<parser::ExternNode>);
 		void visit_global(std::shared_ptr<parser::GlobalNode>);
-		void visit_routine(std::shared_ptr<parser::RoutineNode>);
+		void visit_fn(std::shared_ptr<parser::FnNode>);
+		void visit_return(std::shared_ptr<parser::ReturnNode>);
 		void visit_cmp(std::shared_ptr<parser::CmpNode>);
 		void visit_asm(std::shared_ptr<parser::AsmNode>);
 		void visit_for(std::shared_ptr<parser::ForNode>);

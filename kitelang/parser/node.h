@@ -15,7 +15,8 @@ namespace parser {
 		CHAR_LIT,
 		EXTERN,
 		GLOBAL,
-		ROUTINE,
+		FN,
+		RETURN,
 		CALL,
 		LET,
 		VAR,
@@ -134,18 +135,32 @@ namespace parser {
 			}
 		}
 	};
-	class RoutineNode : public Node {
+	class FnNode : public Node {
 	public:
 		std::string name;
 		std::shared_ptr<RootNode> root;
-		RoutineNode(std::string rout, std::shared_ptr<RootNode> rt)
-			: name(rout), root(rt) {
-			type = ROUTINE;
+		std::vector<std::string> argnames;
+		FnNode(std::string rout, std::vector<std::string> argnms, std::shared_ptr<RootNode> rt)
+			: name(rout), root(rt), argnames(argnms) {
+			type = FN;
 		}
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
-			std::cout << "routine " << name << std::endl;
+			std::cout << "fn " << name << std::endl;
 			root->print(indent + 1);
+		}
+	};
+	class ReturnNode : public Node {
+	public:
+		std::shared_ptr<Node> value;
+		ReturnNode(std::shared_ptr<Node> value)
+			: value(value) {
+			type = RETURN;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "return" << std::endl;
+			value->print(indent + 1);
 		}
 	};
 	class LetNode : public Node {
