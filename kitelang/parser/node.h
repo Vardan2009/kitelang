@@ -17,6 +17,8 @@ namespace parser {
 		GLOBAL,
 		FN,
 		RETURN,
+		BREAK,
+		CONTINUE,
 		CALL,
 		LET,
 		VAR,
@@ -161,6 +163,26 @@ namespace parser {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << "return" << std::endl;
 			value->print(indent + 1);
+		}
+	};
+	class BreakNode : public Node {
+	public:
+		BreakNode() {
+			type = BREAK;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "break" << std::endl;
+		}
+	};
+	class ContinueNode : public Node {
+	public:
+		ContinueNode() {
+			type = CONTINUE;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "continue" << std::endl;
 		}
 	};
 	class LetNode : public Node {

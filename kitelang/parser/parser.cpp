@@ -20,6 +20,8 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
 	if (stmt == "for" && peek()->type == lexer::KEYWORD) return for_node();
+	if (stmt == "break" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<BreakNode>();  };
+	if (stmt == "continue" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<ContinueNode>(); };
 	if (peek()->type == lexer::LBRACE) return statement_list();
 	return expr();
 }

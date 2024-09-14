@@ -1,31 +1,21 @@
 global _start
 
 fn _start() {
-	% print the alphabet
-	for i = 65 to 90 step 1 {
-		kprintc(itoc(i))
-	}
-	return fib(6) % exit with 6th fibonacci number (8)
+    for i = 65 to 90 step 1 {
+        cmp i, 66 {
+            eq {
+                continue
+            }
+        }
+        kprintc(itoc(i))
+        cmp i, 68 {
+            eq {
+                break
+            }
+        }
+    }
+	return 0
 }
-
-fn fib(n) {
-	cmp n, 1 {
-		eq {
-			return 1
-		}
-		neq {
-			cmp n, 2 {
-				eq {
-					return 2
-				}
-				neq {
-					return fib(n - 1) + fib(n - 2)
-				}
-			}
-		}
-	}
-}
-
 
 ~
 ==========================

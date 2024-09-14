@@ -11,6 +11,8 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::CALL: return visit_call(std::static_pointer_cast<parser::CallNode>(node), reg);
 	case parser::FN: return visit_fn(std::static_pointer_cast<parser::FnNode>(node));
 	case parser::RETURN: return visit_return(std::static_pointer_cast<parser::ReturnNode>(node));
+	case parser::BREAK: return visit_break();
+	case parser::CONTINUE: return visit_continue();
 	case parser::INT_LIT: return visit_int_lit(std::static_pointer_cast<parser::IntLitNode>(node), reg);
 	case parser::CHAR_LIT: return visit_char_lit(std::static_pointer_cast<parser::CharLitNode>(node), reg);
 	case parser::STRING_LIT: return visit_string_lit(std::static_pointer_cast<parser::StringLitNode>(node), reg);
@@ -91,6 +93,16 @@ void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) 
 	textSection.push_back("jmp " + curFn + "_end");
 }
 
+void compiler::Compiler::visit_break() {
+	textSection.push_back("jmp loop_end_" + std::to_string(curLoopId));
+}
+
+void compiler::Compiler::visit_continue() {
+	visit_node(curLoop->stepVal, "rax");
+	textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(curLoop->itername)) + "], rax");
+	textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+}
+
 void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	curFn = node->name;
 	textSection.push_back(node->name + ":");
@@ -125,6 +137,7 @@ void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 		std::string k = iter->first;
 		textSection.push_back(cmpkeywordinstruction[k] + " " + k + "_block_" + std::to_string(id));
 	}
+	textSection.push_back("jmp end_" + std::to_string(id));
 	for (std::map<std::string, std::shared_ptr<parser::RootNode>>::const_iterator iter = node->comparisons.begin(); iter != node->comparisons.end(); ++iter) {
 		std::string k = iter->first;
 		std::shared_ptr<parser::RootNode> root = iter->second;
@@ -142,6 +155,8 @@ void compiler::Compiler::visit_asm(std::shared_ptr<parser::AsmNode> node) {
 
 void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	int id = cmpLabelCount++;
+	curLoop = node;
+	curLoopId = id;
 	std::map<std::string, int> oldvars(vars);
 
 	visit_node(node->initVal, "rax");
@@ -149,7 +164,7 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	vars[node->itername] = stacksize;
 	push("rax");
 
-	textSection.push_back("forloop_" + std::to_string(id) + ":");
+	textSection.push_back("loop_" + std::to_string(id) + ":");
 	if (node->type == parser::ROOT) visit_root(std::static_pointer_cast<parser::RootNode>(node->root));
 	else visit_node(node->root);
 
@@ -157,9 +172,9 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
 	visit_node(node->targetVal, "rax");
 	textSection.push_back("cmp [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
-	textSection.push_back("jg forloop_end_" + std::to_string(id));
-	textSection.push_back("jmp forloop_" + std::to_string(id));
-	textSection.push_back("forloop_end_" + std::to_string(id) + ": ");
+	textSection.push_back("jg loop_end_" + std::to_string(id));
+	textSection.push_back("jmp loop_" + std::to_string(id));
+	textSection.push_back("loop_end_" + std::to_string(id) + ": ");
 	for (int i = stacksize; i > oldStackSize; i--) {
 		pop();
 	}
