@@ -1,11 +1,11 @@
 global _start
 
 fn _start() {
-	~ print the alphabet
-	for i = 65 to 90 {
+	% print the alphabet
+	for i = 65 to 90 step 1 {
 		kprintc(itoc(i))
 	}
-	return fib(6) ~ exit with 6th fibonacci number (8)
+	return fib(6) % exit with 6th fibonacci number (8)
 }
 
 fn fib(n) {
