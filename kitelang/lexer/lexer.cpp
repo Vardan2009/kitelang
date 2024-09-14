@@ -80,6 +80,8 @@ token_ptr lexer::Lexer::make_string() {
 
 	// while the current character is not a closing quote
 	while (src[ptr] != '"') {
+		if (src[ptr] == '\\')
+			result += src[ptr++];
 		result += src[ptr++];
 	}
 
@@ -93,6 +95,31 @@ token_ptr lexer::Lexer::make_char() {
 	ptr++;
 	// get the result and increment, since it is guaranteed to be a single character
 	char result = src[ptr++];
+	if (result == '\\') {
+		char code = src[ptr++];
+		switch (code) {
+		case 'n':
+			result = '\n';
+			break;
+		case '0':
+			result = '\0';
+			break;
+		case 't':
+			result = '\t';
+			break;
+		case 'r':
+			result = '\r';
+			break;
+		case '\\':
+			result = '\\';
+			break;
+		case '\"':
+			result = '\"';
+			break;
+		default:
+			throw std::runtime_error("invalid escape character " + std::to_string(code));
+		}
+	}
 	// skip through the closing single quote
 	ptr++;
 	return std::make_shared<Token>(CHAR_LIT, result);

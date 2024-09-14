@@ -51,7 +51,7 @@ void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node,
 }
 
 void compiler::Compiler::visit_char_lit(std::shared_ptr<parser::CharLitNode> node, std::string reg) {
-	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db '" + node->value + "', 0");
+	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db " + std::to_string(node->value));
 	textSection.push_back("mov " + reg + ", datasec_" + std::to_string(dataSectionCount));
 	++dataSectionCount;
 }
@@ -63,10 +63,33 @@ void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::s
 }
 
 void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode> node, std::string reg) {
-	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db \"" + node->value + "\", 0");
+	std::string processedLiteral;
+
+	for (size_t i = 0; i < node->value.length(); ++i) {
+		if (node->value[i] == '\\' && i + 1 < node->value.length()) {
+			switch (node->value[i + 1]) {
+			case 'n': processedLiteral += "\", 10, \""; break;  // newline
+			case '0': processedLiteral += "\", 0, \""; break;   // null-terminator
+			case 't': processedLiteral += "\", 9, \""; break;   // horizontal tab
+			case 'r': processedLiteral += "\", 13, \""; break;  // carriage return
+			case '\\': processedLiteral += "\\\\"; break;       // backslash
+			case '\"': processedLiteral += "\", 34, \""; break; // double quote
+			default:
+				processedLiteral += node->value[i + 1];
+				break;
+			}
+			++i;
+		}
+		else {
+			processedLiteral += node->value[i];
+		}
+	}
+
+	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db \"" + processedLiteral + "\", 0");
 	textSection.push_back("mov " + reg + ", datasec_" + std::to_string(dataSectionCount));
 	++dataSectionCount;
 }
+
 
 void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std::string reg) {
 	// for (int i = node->args.size(); i < 6; i++) {
