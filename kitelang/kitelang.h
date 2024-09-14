@@ -1,4 +1,7 @@
-﻿#pragma once
+﻿// KITELANG.H
+// Header file containing all imports
+
+#pragma once
 #include <iostream>
 #include <string>
 #include <fstream>
