@@ -1,14 +1,18 @@
 global _start
 
 fn _start() {
-    for i = 65 to 90 step 1 {
-        cmp i, 66 {
+    let x = 65
+    loop {
+        % infinite loop
+        cmp x, 66 {
             eq {
+                x = x + 1
                 continue
             }
         }
-        kprintc(itoc(i))
-        cmp i, 68 {
+        kprintc(itoc(x))
+        x = x + 1
+        cmp x, 68 {
             eq {
                 break
             }

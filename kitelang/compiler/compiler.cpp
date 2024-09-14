@@ -23,6 +23,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::CMP: return visit_cmp(std::static_pointer_cast<parser::CmpNode>(node));
 	case parser::ASM: return visit_asm(std::static_pointer_cast<parser::AsmNode>(node));
 	case parser::FOR: return visit_for(std::static_pointer_cast<parser::ForNode>(node));
+	case parser::LOOP: return visit_loop(std::static_pointer_cast<parser::LoopNode>(node));
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -98,9 +99,14 @@ void compiler::Compiler::visit_break() {
 }
 
 void compiler::Compiler::visit_continue() {
-	visit_node(curLoop->stepVal, "rax");
-	textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(curLoop->itername)) + "], rax");
-	textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+	if (std::shared_ptr<parser::ForNode> forNode = std::dynamic_pointer_cast<parser::ForNode>(curLoop)) {
+		visit_node(forNode->stepVal, "rax");
+		textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(forNode->itername)) + "], rax");
+		textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+	}
+	else if (std::shared_ptr<parser::LoopNode> loopNode = std::dynamic_pointer_cast<parser::LoopNode>(curLoop)) {
+		textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+	}
 }
 
 void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
@@ -151,6 +157,16 @@ void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 
 void compiler::Compiler::visit_asm(std::shared_ptr<parser::AsmNode> node) {
 	textSection.push_back(node->content);
+}
+
+void compiler::Compiler::visit_loop(std::shared_ptr<parser::LoopNode> node) {
+	int id = cmpLabelCount++;
+	curLoop = node;
+	curLoopId = id;
+	textSection.push_back("loop_" + std::to_string(id) + ":");
+	visit_node(node->root);
+	textSection.push_back("jmp loop_" + std::to_string(id));
+	textSection.push_back("loop_end_" + std::to_string(id) + ":");
 }
 
 void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {

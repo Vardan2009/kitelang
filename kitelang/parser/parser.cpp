@@ -20,6 +20,7 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
 	if (stmt == "for" && peek()->type == lexer::KEYWORD) return for_node();
+	if (stmt == "loop" && peek()->type == lexer::KEYWORD) return loop_node();
 	if (stmt == "break" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<BreakNode>();  };
 	if (stmt == "continue" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<ContinueNode>(); };
 	if (peek()->type == lexer::LBRACE) return statement_list();
@@ -134,6 +135,11 @@ std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {
 std::shared_ptr<parser::AsmNode> parser::Parser::asm_node() {
 	consume(lexer::KEYWORD, "asm");
 	return std::make_shared<AsmNode>(advance()->value_str);
+}
+
+std::shared_ptr<parser::LoopNode> parser::Parser::loop_node() {
+	consume(lexer::KEYWORD, "loop");
+	return std::make_shared<LoopNode>(statement());
 }
 
 std::shared_ptr<parser::ForNode> parser::Parser::for_node() {

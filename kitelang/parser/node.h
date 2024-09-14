@@ -24,7 +24,8 @@ namespace parser {
 		VAR,
 		CMP,
 		ASM,
-		FOR
+		FOR,
+		LOOP
 	} node_t;
 	class Node {
 	public:
@@ -257,6 +258,19 @@ namespace parser {
 			initVal->print(indent + 1);
 			targetVal->print(indent + 1);
 			stepVal->print(indent + 1);
+			root->print(indent + 1);
+		}
+	};
+	class LoopNode : public Node {
+	public:
+		std::shared_ptr<Node> root;
+		LoopNode(std::shared_ptr<Node> root)
+			: root(root) {
+			type = LOOP;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "loop" << std::endl;
 			root->print(indent + 1);
 		}
 	};
