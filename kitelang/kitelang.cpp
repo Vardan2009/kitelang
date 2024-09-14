@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// print the result to cout stream
-	compiler.print();
+	compiler.print(std::cout);
 
 	return 0;
 }

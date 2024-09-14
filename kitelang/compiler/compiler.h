@@ -49,15 +49,14 @@ namespace compiler {
 	public:
 		Compiler(std::shared_ptr<parser::RootNode> r) : root(r), dataSectionCount(0) {}
 		void codegen();
-		void print() {
-			std::cout << "--- COMPILED ASSEMBLY ---" << std::endl;
-			std::cout << "section .data" << std::endl;
+		void print(std::ostream& stream) {
+			stream << "section .data" << std::endl;
 			for (std::string instruction : dataSection) {
-				std::cout << tab << instruction << std::endl;
+				stream << tab << instruction << std::endl;
 			}
-			std::cout << "section .text" << std::endl;
+			stream << "section .text" << std::endl;
 			for (std::string instruction : textSection) {
-				std::cout << tab << instruction << std::endl;
+				stream << tab << instruction << std::endl;
 			}
 		}
 	};
