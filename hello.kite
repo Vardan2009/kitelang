@@ -1,7 +1,11 @@
 global _start
 
 fn _start() {
-	return fib(6)
+	~ print the alphabet
+	for i = 65 to 90 {
+		kprintc(itoc(i))
+	}
+	return fib(6) ~ exit with 6th fibonacci number (8)
 }
 
 fn fib(n) {
@@ -20,4 +24,66 @@ fn fib(n) {
 			}
 		}
 	}
+}
+
+
+~
+==========================
+STANDARD LIBRARY FUNCTIONS
+==========================
+~
+
+~
+kprintc function
+args:
+    the character (stored in rdi)
+usage example:
+    kprint('V')
+~
+fn kprintc() {
+    asm "mov rdx, 1"
+    asm "mov rsi, rdi"
+    asm "mov rax, 1"
+    asm "mov rdi, 1"
+    asm "syscall"
+}
+~
+kprint function
+args:
+    the pointer to the string (stored in rdi)
+usage example:
+    kprint("Hello World!")
+~
+fn kprint() {
+    asm "push rdi"
+    asm "mov rax, 1"
+    asm "mov rdi, 1"
+    asm ".kprint_loop:"
+    asm "    mov rsi, [rsp]"
+    asm "    movzx rdx, byte [rsi]"
+    asm "    test rdx, rdx"
+    asm "    jz .kprint_done"
+    asm "    mov rax, 1"
+    asm "    mov rdi, 1"
+    asm "    mov rdx, 1"
+    asm "    syscall"
+    asm "    inc rsi"
+    asm "    mov [rsp], rsi"
+    asm "    jmp .kprint_loop"
+    asm ".kprint_done:"
+    asm "    pop rdi"
+}
+
+~
+itoc function
+args:
+    the ASCII integer (stored in rdi)
+usage exmaple:
+    itoc(65) % 'A'
+~
+fn itoc() {
+    asm "sub rsp, 8"  
+    asm "mov byte [rsp], dil"
+    asm "lea rax, [rsp]"
+    asm "add rsp, 8"  
 }
