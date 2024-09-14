@@ -1,53 +1,23 @@
 global _start
 
 fn _start() {
-	for i = 0 to 25 step 1 {
-        kprintc(itoc(add(65,i)))
-    }
-    kexit(0)
+	return fib(6)
 }
 
-fn add(a, b) {
-	return a + b
-}
-
-~
-kprintc function
-args:
-    the character (stored in rdi)
-usage example:
-    kprintc('V')
-~
-fn kprintc() {
-    asm "mov rdx, 1"
-    asm "mov rsi, rdi"
-    asm "mov rax, 1"
-    asm "mov rdi, 1"
-    asm "syscall"
-}
-
-~
-kexit function
-args:
-    the exit code (stored in rdi)
-usage example:
-    kexit(0)
-~
-fn kexit() {
-    asm "mov rax, 60"
-    asm "syscall"
-}
-
-~
-itoc function
-args:
-    the ASCII integer (stored in rdi)
-usage exmaple:
-    itoc(65) % 'A'
-~
-fn itoc() {
-    asm "sub rsp, 8"  
-    asm "mov byte [rsp], dil"
-    asm "lea rax, [rsp]"
-    asm "add rsp, 8"  
+fn fib(n) {
+	cmp n, 1 {
+		eq {
+			return 1
+		}
+		neq {
+			cmp n, 2 {
+				eq {
+					return 2
+				}
+				neq {
+					return fib(n - 1) + fib(n - 2)
+				}
+			}
+		}
+	}
 }

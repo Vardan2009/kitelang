@@ -91,7 +91,7 @@ void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) 
 
 void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) {
 	visit_node(node->value, "rax");
-	textSection.push_back("jmp ." + curFn + "_end");
+	textSection.push_back("jmp " + curFn + "_end");
 }
 
 void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
@@ -103,12 +103,19 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 		push(argregs[i]);
 	}
 	visit_root_with_scope(node->root);
-	textSection.push_back("." + node->name + "_end:");
+	textSection.push_back(node->name + "_end:");
 	for (int i = 0; i < node->argnames.size(); i++) {
 		pop();
 	}
 	curFn = "";
 	vars = oldvars;
+	// _start is the entry point
+	if (node->name == "_start") {
+		// for exiting with the return value of _start
+		textSection.push_back("mov rdi, rax");
+		textSection.push_back("mov rax, 60");
+		textSection.push_back("syscall");
+	}
 	textSection.push_back("ret");
 }
 
