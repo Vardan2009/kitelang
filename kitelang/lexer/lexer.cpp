@@ -21,8 +21,8 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		// if the current character is a single quote, that means it's a char literal
 		else if (src[ptr] == '\'')
 			result.push_back(make_char());
-		// if the current character is a percentage sign, it is a register reference (e.g %rax)
-		else if (src[ptr] == '%')
+		// if the current character is an and sign, it is a register reference (e.g &rax)
+		else if (src[ptr] == '&')
 			result.push_back(make_reg());
 		// if the count of the current character is non-zero (it is in the list)
 		// then it is a special character
