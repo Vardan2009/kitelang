@@ -81,3 +81,52 @@ fn itoc() {
     asm "lea rax, [rsp]"
     asm "add rsp, 8"  
 }
+
+~
+kprintascii function
+args:
+    the ASCII integer (stored in rdi)
+usage example:
+    kprintascii(65) % prints A
+~
+fn kprintascii() {
+    asm "push rdi"
+    asm "mov rax, 1"
+    asm "mov rdi, 1"
+    asm "lea rsi, [rsp]"
+    asm "mov rdx, 1"
+    asm "syscall"
+    asm "pop rdi"
+}
+
+~
+kprinti function
+args:
+    the integer (stored in rdi)
+usage example:
+    kprinti(10) % prints 10
+~
+fn kprinti() {
+    asm "mov rbp, 0"
+    asm ".convert_loop:"
+    asm "mov rax, rdi"
+    asm "mov rbx, 10"
+    asm "xor rdx, rdx"
+    asm "div rbx"
+    asm "push rdx"
+    asm "inc rbp"
+    asm "mov rdi, rax"
+    asm "cmp rdi, 0"
+    asm "je .convert_loop_end"
+    asm "jmp .convert_loop"
+    asm ".convert_loop_end:"
+    asm ".print_loop:"
+    asm "pop rdi"
+    asm "add rdi, '0'"
+    asm "call kprintascii"
+    asm "dec rbp"
+    asm "test rbp, rbp"
+    asm "jz .print_end"
+    asm "jmp .print_loop"
+    asm ".print_end:"
+}
