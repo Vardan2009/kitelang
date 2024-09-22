@@ -26,7 +26,8 @@ namespace parser {
 		CMP,
 		ASM,
 		FOR,
-		LOOP
+		LOOP,
+		CDIRECT
 	} node_t;
 	class Node {
 	public:
@@ -219,6 +220,19 @@ namespace parser {
 		VarNode(std::string rout)
 			: name(rout) {
 			type = VAR;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << name << std::endl;
+		}
+	};
+	class CompDirectNode : public Node {
+	public:
+		std::string name;
+		int val;
+		CompDirectNode(std::string rout, int val)
+			: name(rout), val(val) {
+			type = CDIRECT;
 		}
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';

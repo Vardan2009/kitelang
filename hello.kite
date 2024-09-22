@@ -130,3 +130,15 @@ fn kprinti() {
     asm "jmp .print_loop"
     asm ".print_end:"
 }
+
+fn kreadc() {
+    @stackszinc 1
+    asm "sub rsp, 8"
+    asm "mov rdi, rsp"
+    asm "mov rax, 0"
+    asm "mov rdi, 0"
+    asm "mov rsi, rsp"
+    asm "mov rdx, 1"
+    asm "syscall"
+    asm "movzx rax, byte [rsp]"
+}

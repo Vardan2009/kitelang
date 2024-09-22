@@ -24,7 +24,13 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "break" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<BreakNode>();  };
 	if (stmt == "continue" && peek()->type == lexer::KEYWORD) { advance(); return std::make_shared<ContinueNode>(); };
 	if (peek()->type == lexer::LBRACE) return statement_list();
+	if (peek()->type == lexer::CDIRECT) return comp_direct();
 	return expr();
+}
+
+std::shared_ptr<parser::CompDirectNode> parser::Parser::comp_direct() {
+	std::string name = advance()->value_str;
+	return std::make_shared<CompDirectNode>(name, advance()->value);
 }
 
 std::shared_ptr<parser::Node> parser::Parser::expr() {

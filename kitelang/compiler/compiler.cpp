@@ -25,6 +25,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::ASM: return visit_asm(std::static_pointer_cast<parser::AsmNode>(node));
 	case parser::FOR: return visit_for(std::static_pointer_cast<parser::ForNode>(node));
 	case parser::LOOP: return visit_loop(std::static_pointer_cast<parser::LoopNode>(node));
+	case parser::CDIRECT: return visit_cdirect(std::static_pointer_cast<parser::CompDirectNode>(node));
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -230,6 +231,18 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 	visit_node(node->root, "rax");
 	vars[node->name] = stacksize;
 	push("rax");
+}
+
+void compiler::Compiler::visit_cdirect(std::shared_ptr<parser::CompDirectNode> node) {
+	if (node->name == "stackszinc") {
+		stacksize += node->val;
+	}
+	else if (node->name == "stackszdec") {
+		stacksize -= node->val;
+	}
+	else {
+		throw std::runtime_error("Invalid compiler directive " + node->name);
+	}
 }
 
 // this part is kinda complicated

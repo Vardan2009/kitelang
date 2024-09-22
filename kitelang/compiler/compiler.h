@@ -45,6 +45,8 @@ namespace compiler {
 		void visit_let(std::shared_ptr<parser::LetNode>);
 		void visit_binop(std::shared_ptr<parser::BinOpNode>, std::string);
 
+		void visit_cdirect(std::shared_ptr<parser::CompDirectNode>);
+
 		int get_variable_offset(std::string);
 
 		std::map<std::string, int> vars {};

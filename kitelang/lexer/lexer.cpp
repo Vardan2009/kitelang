@@ -24,6 +24,9 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		// if the current character is an and sign, it is a register reference (e.g &rax)
 		else if (src[ptr] == '&')
 			result.push_back(make_reg());
+		// if the current character is an at sign, it is a compiler directive (e.g @stackszinc)
+		else if (src[ptr] == '@')
+			result.push_back(make_cdirect());
 		// if the count of the current character is non-zero (it is in the list)
 		// then it is a special character
 		else if (specials.count(src[ptr]))
@@ -91,6 +94,22 @@ token_ptr lexer::Lexer::make_string() {
 	// skip through the closing double quote
 	ptr++;
 	return std::make_shared<Token>(STRING_LIT, result);
+}
+
+token_ptr lexer::Lexer::make_cdirect() {
+	// skip through the single quote
+	ptr++;
+
+	// this will store the result
+	std::string result;
+
+	// while the current character is alphanumeric or an underscore
+	while (isalnum(src[ptr])) {
+		// add to the result and increment the pointer
+		result += src[ptr++];
+	}
+
+	return std::make_shared<Token>(CDIRECT, result);
 }
 
 token_ptr lexer::Lexer::make_reg() {

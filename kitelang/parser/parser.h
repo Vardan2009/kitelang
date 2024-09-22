@@ -6,6 +6,8 @@ namespace parser {
 	private:
 		std::vector<std::shared_ptr<lexer::Token>> tokens;
 
+		std::shared_ptr<CompDirectNode> comp_direct();
+
 		std::shared_ptr<RootNode> statement_list();
 		std::shared_ptr<Node> statement();
 		std::shared_ptr<Node> expr();
