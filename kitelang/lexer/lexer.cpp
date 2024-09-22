@@ -21,6 +21,9 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		// if the current character is a single quote, that means it's a char literal
 		else if (src[ptr] == '\'')
 			result.push_back(make_char());
+		// if the current character is a percentage sign, it is a register reference (e.g %rax)
+		else if (src[ptr] == '%')
+			result.push_back(make_reg());
 		// if the count of the current character is non-zero (it is in the list)
 		// then it is a special character
 		else if (specials.count(src[ptr]))
@@ -88,6 +91,22 @@ token_ptr lexer::Lexer::make_string() {
 	// skip through the closing double quote
 	ptr++;
 	return std::make_shared<Token>(STRING_LIT, result);
+}
+
+token_ptr lexer::Lexer::make_reg() {
+	// skip through the single quote
+	ptr++;
+
+	// this will store the result
+	std::string result;
+
+	// while the current character is alphanumeric or an underscore
+	while (isalnum(src[ptr])) {
+		// add to the result and increment the pointer
+		result += src[ptr++];
+	}
+
+	return std::make_shared<Token>(REG, result);
 }
 
 token_ptr lexer::Lexer::make_char() {

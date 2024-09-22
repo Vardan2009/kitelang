@@ -38,6 +38,7 @@ namespace lexer {
 		token_ptr make_int();               // for making and returning an integer token                (e.g `1234`)
 		token_ptr make_string();            // for making and returning a string token                  (e.g `"Hello, World!"`)
 		token_ptr make_char();              // for making and returning a char token                    (e.g `'A'`)
+		token_ptr make_reg();               // for making and returning a register token                (e.g `%rax`)
 		token_ptr make_identifier();        // for making and returning a keyword or identifier token   (e.g `varName` or `let`)
 		token_ptr make_special();           // for making and returning a special character token       (e.g `+` or `~`)
 		void skip_comment();                // for skipping single line comments                        (e.g % test)

@@ -15,6 +15,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::CONTINUE: return visit_continue();
 	case parser::INT_LIT: return visit_int_lit(std::static_pointer_cast<parser::IntLitNode>(node), reg);
 	case parser::CHAR_LIT: return visit_char_lit(std::static_pointer_cast<parser::CharLitNode>(node), reg);
+	case parser::REG: return visit_reg(std::static_pointer_cast<parser::RegNode>(node), reg);
 	case parser::STRING_LIT: return visit_string_lit(std::static_pointer_cast<parser::StringLitNode>(node), reg);
 	case parser::VAR: return visit_var(std::static_pointer_cast<parser::VarNode>(node), reg);
 	case parser::BINOP: return visit_binop(std::static_pointer_cast<parser::BinOpNode>(node), reg);
@@ -54,6 +55,11 @@ void compiler::Compiler::visit_char_lit(std::shared_ptr<parser::CharLitNode> nod
 	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db " + std::to_string(node->value));
 	textSection.push_back("mov " + reg + ", datasec_" + std::to_string(dataSectionCount));
 	++dataSectionCount;
+}
+
+void compiler::Compiler::visit_reg(std::shared_ptr<parser::RegNode> node, std::string reg) {
+	if (node->value == reg) return;
+	textSection.push_back("mov " + reg + ", " + node->value);
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {

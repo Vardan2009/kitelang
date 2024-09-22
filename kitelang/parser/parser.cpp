@@ -54,33 +54,40 @@ std::shared_ptr<parser::Node> parser::Parser::term() {
 }
 
 std::shared_ptr<parser::Node> parser::Parser::factor() {
-	if (peek()->type == lexer::INT_LIT)
+	switch (peek()->type) {
+	case lexer::INT_LIT:
 		return std::make_shared<IntLitNode>(advance()->value);
-	if (peek()->type == lexer::STRING_LIT)
+	case lexer::STRING_LIT:
 		return std::make_shared<StringLitNode>(advance()->value_str);
-	if (peek()->type == lexer::CHAR_LIT)
+	case lexer::CHAR_LIT:
 		return std::make_shared<CharLitNode>((char)advance()->value);
-	if (peek()->type == lexer::LPAREN) {
-		consume(lexer::LPAREN);
-		std::shared_ptr<parser::Node> n = expr();
-		consume(lexer::RPAREN);
-		return n;
-	}
-	if (peek()->type == lexer::IDENTIFIER) {
-		std::string name = advance()->value_str;
-		if (peek()->type != lexer::LPAREN)
-			return std::make_shared<VarNode>(name);
-		consume(lexer::LPAREN);
-		std::vector<std::shared_ptr<Node>> args;
-		while (peek()->type != lexer::RPAREN) {
-			args.push_back(expr());
-			if (peek()->type != lexer::COMMA) break;
-			consume(lexer::COMMA);
+	case lexer::REG:
+		return std::make_shared<RegNode>(advance()->value_str);
+	case lexer::LPAREN:
+		{
+			consume(lexer::LPAREN);
+			std::shared_ptr<parser::Node> n = expr();
+			consume(lexer::RPAREN);
+			return n;
 		}
-		consume(lexer::RPAREN);
-		return std::make_shared<CallNode>(name, args);
+	case lexer::IDENTIFIER:
+		{
+			std::string name = advance()->value_str;
+			if (peek()->type != lexer::LPAREN)
+				return std::make_shared<VarNode>(name);
+			consume(lexer::LPAREN);
+			std::vector<std::shared_ptr<Node>> args;
+			while (peek()->type != lexer::RPAREN) {
+				args.push_back(expr());
+				if (peek()->type != lexer::COMMA) break;
+				consume(lexer::COMMA);
+			}
+			consume(lexer::RPAREN);
+			return std::make_shared<CallNode>(name, args);
+		}
+	default:
+		throw std::runtime_error("invalid factor " + std::to_string(peek()->type));
 	}
-	throw std::runtime_error("invalid factor " + std::to_string(peek()->type));
 }
 
 std::shared_ptr<parser::GlobalNode> parser::Parser::global_node() {

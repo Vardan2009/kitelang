@@ -13,6 +13,7 @@ namespace parser {
 		STRING_LIT,
 		INT_LIT,
 		CHAR_LIT,
+		REG,
 		EXTERN,
 		GLOBAL,
 		FN,
@@ -72,6 +73,18 @@ namespace parser {
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << value << std::endl;
+		}
+	};
+	class RegNode : public Node {
+	public:
+		std::string value;
+		RegNode(std::string val)
+			: value(val) {
+			type = REG;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "%" << value << std::endl;
 		}
 	};
 	class StringLitNode : public Node {
