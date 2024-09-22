@@ -1,24 +1,47 @@
 global _start
 
+% simple calculator example
 fn _start() {
-    let x = 65
-    loop {
-        % infinite loop
-        cmp x, 66 {
-            eq {
-                x = x + 1
-                continue
-            }
-        }
-        printc(itoc(x))
-        x = x + 1
-        cmp x, 68 {
-            eq {
-                break
-            }
+    % read left side and convert to integer ('0's code is 48)
+    let x = readc() - 48
+    printc(' ')
+    % read operation
+    let op = readc()
+    printc(' ')
+    % read right side
+    let y = readc() - 48
+    print(" = ")
+    % plus operation
+    cmp op, 43 {
+        eq {
+            printi(x + y)
+            return 0
         }
     }
-	return 0
+    % minus operation
+    cmp op, 45 {
+        eq {
+            printi(x - y)
+            return 0
+        }
+    }
+    % multiply operation
+    cmp op, 42 {
+        eq {
+            printi(x * y)
+            return 0
+        }
+    }
+    % divide operation
+    cmp op, 47 {
+        eq {
+            printi(x / y)
+            return 0
+        }
+    }
+    % if all other cases fail
+    print("\nInvalid Operation!!")
+	return 1
 }
 
 ~
@@ -123,7 +146,7 @@ fn printi() {
     asm ".print_loop:"
     asm "pop rdi"
     asm "add rdi, '0'"
-    asm "call kprintascii"
+    asm "call printascii"
     asm "dec rbp"
     asm "test rbp, rbp"
     asm "jz .print_end"
