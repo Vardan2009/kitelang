@@ -10,7 +10,7 @@ fn _start() {
                 continue
             }
         }
-        kprintc(itoc(x))
+        printc(itoc(x))
         x = x + 1
         cmp x, 68 {
             eq {
@@ -28,13 +28,13 @@ STANDARD LIBRARY FUNCTIONS
 ~
 
 ~
-kprintc function
+printc function
 args:
     the character (stored in rdi)
 usage example:
-    kprint('V')
+    printc('V')
 ~
-fn kprintc() {
+fn printc() {
     asm "mov rdx, 1"
     asm "mov rsi, rdi"
     asm "mov rax, 1"
@@ -42,13 +42,13 @@ fn kprintc() {
     asm "syscall"
 }
 ~
-kprint function
+print function
 args:
     the pointer to the string (stored in rdi)
 usage example:
-    kprint("Hello World!")
+    print("Hello World!")
 ~
-fn kprint() {
+fn print() {
     asm "push rdi"
     asm "mov rax, 1"
     asm "mov rdi, 1"
@@ -83,13 +83,13 @@ fn itoc() {
 }
 
 ~
-kprintascii function
+printascii function
 args:
     the ASCII integer (stored in rdi)
 usage example:
-    kprintascii(65) % prints A
+    printascii(65) % prints A
 ~
-fn kprintascii() {
+fn printascii() {
     asm "push rdi"
     asm "mov rax, 1"
     asm "mov rdi, 1"
@@ -100,13 +100,13 @@ fn kprintascii() {
 }
 
 ~
-kprinti function
+printi function
 args:
     the integer (stored in rdi)
 usage example:
-    kprinti(10) % prints 10
+    printi(10) % prints 10
 ~
-fn kprinti() {
+fn printi() {
     asm "mov rbp, 0"
     asm ".convert_loop:"
     asm "mov rax, rdi"
@@ -131,7 +131,14 @@ fn kprinti() {
     asm ".print_end:"
 }
 
-fn kreadc() {
+~
+readc function
+args:
+    none
+usage example:
+    readc() % first character in stdin
+~
+fn readc() {
     @stackszinc 1
     asm "sub rsp, 8"
     asm "mov rdi, rsp"
