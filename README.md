@@ -17,9 +17,11 @@ fn _start() {
 - Variables (and basic arithmetic)
 ```
 global _start
-extern printi
-extern printc
-extern print
+extern {
+  print,
+  printi,
+  printc
+}
 
 fn _start() {
   let x = 9
@@ -56,9 +58,11 @@ fn factor(a, b) {
 - Pointers
 ```
 global _start
-extern print
-extern printi
-extern printc
+extern {
+  print,
+  printi,
+  printc
+}
 
 fn _start() {
   let value = 20
