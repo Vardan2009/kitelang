@@ -1,47 +1,19 @@
 global _start
 
-% simple calculator example
+% pointers!!!1
 fn _start() {
-    % read left side and convert to integer ('0's code is 48)
-    let x = readc() - 48
-    printc(' ')
-    % read operation
-    let op = readc()
-    printc(' ')
-    % read right side
-    let y = readc() - 48
-    print(" = ")
-    % plus operation
-    cmp op, 43 {
-        eq {
-            printi(x + y)
-            return 0
-        }
-    }
-    % minus operation
-    cmp op, 45 {
-        eq {
-            printi(x - y)
-            return 0
-        }
-    }
-    % multiply operation
-    cmp op, 42 {
-        eq {
-            printi(x * y)
-            return 0
-        }
-    }
-    % divide operation
-    cmp op, 47 {
-        eq {
-            printi(x / y)
-            return 0
-        }
-    }
-    % if all other cases fail
-    print("\nInvalid Operation!!")
-	return 1
+    let value = 20
+    let ptr = &value
+    print("The Value: ")
+    printi(value)
+    printc('\n')
+    print("The Address: ")
+    printi(ptr)
+    printc('\n')
+    print("Dereferenced Pointer Value: ")
+    printi(*ptr)
+    printc('\n')
+	return 0
 }
 
 ~

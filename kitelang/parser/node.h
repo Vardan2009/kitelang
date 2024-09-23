@@ -14,6 +14,8 @@ namespace parser {
 		INT_LIT,
 		CHAR_LIT,
 		REG,
+		ADDROF,
+		DEREF,
 		EXTERN,
 		GLOBAL,
 		FN,
@@ -224,6 +226,30 @@ namespace parser {
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << name << std::endl;
+		}
+	};
+	class AddrOfNode : public Node {
+	public:
+		std::string name;
+		AddrOfNode(std::string rout)
+			: name(rout) {
+			type = ADDROF;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "&" << name << std::endl;
+		}
+	};
+	class DerefNode : public Node {
+	public:
+		std::string name;
+		DerefNode(std::string rout)
+			: name(rout) {
+			type = DEREF;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "*" << name << std::endl;
 		}
 	};
 	class CompDirectNode : public Node {

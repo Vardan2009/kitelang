@@ -27,6 +27,14 @@ namespace lexer {
 			{',', lexer::COMMA},
 			{'=', lexer::EQ},
 		};
+		// map of each prefix and its token type
+		std::map<char, lexer::token_t> prefixes = {
+			{'^', lexer::REG},
+			{'&', lexer::ADDROF},
+			{'*', lexer::DEREF},
+			{'@', lexer::CDIRECT}
+		};
+		// set of keywords in the language
 		// this is to determine if the "word" is a keyword or a reference to a variable or function (identifier)
 		std::set<std::string> keywords = {
 			"extern", "global", "fn", "let", "for", "to", "step", "cmp", "asm", "eq", "neq", "return", "break", "continue", "loop"
@@ -35,15 +43,14 @@ namespace lexer {
 		// the pointer to the current character
 		int ptr = 0;
 		// function declarations
-		token_ptr make_int();               // for making and returning an integer token                (e.g `1234`)
-		token_ptr make_string();            // for making and returning a string token                  (e.g `"Hello, World!"`)
-		token_ptr make_char();              // for making and returning a char token                    (e.g `'A'`)
-		token_ptr make_reg();               // for making and returning a register token                (e.g `%rax`)
-		token_ptr make_identifier();        // for making and returning a keyword or identifier token   (e.g `varName` or `let`)
-		token_ptr make_cdirect();           // for making and returning a compiler directive
-		token_ptr make_special();           // for making and returning a special character token       (e.g `+` or `~`)
-		void skip_comment();                // for skipping single line comments                        (e.g % test)
-		void skip_multiline_comment();      // for skipping multiline comments                          (e.g ~ test ~)
+		token_ptr make_int();                // for making and returning an integer token                (e.g `1234`)
+		token_ptr make_string();             // for making and returning a string token                  (e.g `"Hello, World!"`)
+		token_ptr make_char();               // for making and returning a char token                    (e.g `'A'`)
+		token_ptr make_identifier();         // for making and returning a keyword or identifier token   (e.g `varName` or `let`)
+		token_ptr make_special();            // for making and returning a special character token       (e.g `+` or `~`)
+		token_ptr make_with_prefix(token_t); // for making and returning an identifier with a prefix      (e.g `^rax` or `*ptr`)
+		void skip_comment();                 // for skipping single line comments                        (e.g % test)
+		void skip_multiline_comment();       // for skipping multiline comments                          (e.g ~ test ~)
 	public:
 	    // the constructor that takes the source code and resets the character pointer
 		Lexer(std::string src) {

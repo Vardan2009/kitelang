@@ -69,6 +69,10 @@ std::shared_ptr<parser::Node> parser::Parser::factor() {
 		return std::make_shared<CharLitNode>((char)advance()->value);
 	case lexer::REG:
 		return std::make_shared<RegNode>(advance()->value_str);
+	case lexer::ADDROF:
+		return std::make_shared<AddrOfNode>(advance()->value_str);
+	case lexer::DEREF:
+		return std::make_shared<DerefNode>(advance()->value_str);
 	case lexer::LPAREN:
 		{
 			consume(lexer::LPAREN);

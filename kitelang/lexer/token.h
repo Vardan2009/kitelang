@@ -20,7 +20,9 @@ namespace lexer {
 		DIV,
 		COMMA,
 		EQ,
-		CDIRECT
+		CDIRECT,
+		ADDROF,
+		DEREF
 	} token_t;
 
 	// Token class

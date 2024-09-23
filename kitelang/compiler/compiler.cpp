@@ -26,6 +26,8 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::FOR: return visit_for(std::static_pointer_cast<parser::ForNode>(node));
 	case parser::LOOP: return visit_loop(std::static_pointer_cast<parser::LoopNode>(node));
 	case parser::CDIRECT: return visit_cdirect(std::static_pointer_cast<parser::CompDirectNode>(node));
+	case parser::ADDROF: return visit_addrof(std::static_pointer_cast<parser::AddrOfNode>(node), reg);
+	case parser::DEREF: return visit_deref(std::static_pointer_cast<parser::DerefNode>(node), reg);
 	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
 	}
 }
@@ -61,6 +63,19 @@ void compiler::Compiler::visit_char_lit(std::shared_ptr<parser::CharLitNode> nod
 void compiler::Compiler::visit_reg(std::shared_ptr<parser::RegNode> node, std::string reg) {
 	if (node->value == reg) return;
 	textSection.push_back("mov " + reg + ", " + node->value);
+}
+
+void compiler::Compiler::visit_addrof(std::shared_ptr<parser::AddrOfNode> node, std::string reg) {
+	if (vars.find(node->name) == vars.end())
+		throw std::runtime_error("variable " + node->name + " is not present in this context");
+	textSection.push_back("lea " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
+}
+
+void compiler::Compiler::visit_deref(std::shared_ptr<parser::DerefNode> node, std::string reg) {
+	if (vars.find(node->name) == vars.end())
+		throw std::runtime_error("variable " + node->name + " is not present in this context");
+	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
+	textSection.push_back("mov " + reg + ", [" + reg + "]");
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
