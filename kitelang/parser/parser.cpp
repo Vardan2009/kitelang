@@ -102,12 +102,42 @@ std::shared_ptr<parser::Node> parser::Parser::factor() {
 
 std::shared_ptr<parser::GlobalNode> parser::Parser::global_node() {
 	consume(lexer::KEYWORD, "global");
-	return std::make_shared<GlobalNode>(advance()->value_str);
+	if (peek()->type == lexer::LBRACE) {
+		std::vector<std::string> symbols{};
+		consume(lexer::LBRACE);
+		while (peek()->type != lexer::RBRACE) {
+			if (peek()->type != lexer::IDENTIFIER)
+				throw std::runtime_error("expected identifier");
+			symbols.push_back(advance()->value_str);
+			if (peek()->type == lexer::RBRACE) break;
+			consume(lexer::COMMA);
+		}
+		consume(lexer::RBRACE);
+		return std::make_shared<GlobalNode>(symbols);
+	}
+	if (peek()->type != lexer::IDENTIFIER)
+		throw std::runtime_error("expected identifier");
+	return std::make_shared<GlobalNode>(std::vector<std::string>{ advance()->value_str });
 }
 
 std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 	consume(lexer::KEYWORD, "extern");
-	return std::make_shared<ExternNode>(advance()->value_str);
+	if (peek()->type == lexer::LBRACE) {
+		std::vector<std::string> symbols {};
+		consume(lexer::LBRACE);
+		while (peek()->type != lexer::RBRACE) {
+			if (peek()->type != lexer::IDENTIFIER)
+				throw std::runtime_error("expected identifier");
+			symbols.push_back(advance()->value_str);
+			if (peek()->type == lexer::RBRACE) break;
+			consume(lexer::COMMA);
+		}
+		consume(lexer::RBRACE);
+		return std::make_shared<ExternNode>(symbols);
+	}
+	if (peek()->type != lexer::IDENTIFIER)
+		throw std::runtime_error("expected identifier");
+	return std::make_shared<ExternNode>(std::vector<std::string>{ advance()->value_str });
 }
 
 std::shared_ptr<parser::ReturnNode> parser::Parser::return_node() {

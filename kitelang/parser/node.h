@@ -116,26 +116,34 @@ namespace parser {
 	};
 	class ExternNode : public Node {
 	public:
-		std::string routine;
-		ExternNode(std::string rout)
-			: routine(rout) {
+		std::vector<std::string> symbols;
+		ExternNode(std::vector<std::string> rout)
+			: symbols(rout) {
 			type = EXTERN;
 		}
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
-			std::cout << "extern " << routine << std::endl;
+			std::cout << "extern" << std::endl;
+			for (std::string s : symbols) {
+				for (int i = 0; i < indent + 1; i++) std::cout << "--"; std::cout << ' ';
+				std::cout << s << std::endl;
+			}
 		}
 	};
 	class GlobalNode : public Node {
 	public:
-		std::string routine;
-		GlobalNode(std::string rout)
-			: routine(rout) {
+		std::vector<std::string> symbols;
+		GlobalNode(std::vector<std::string> rout)
+			: symbols(rout) {
 			type = GLOBAL;
 		}
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
-			std::cout << "global " << routine << std::endl;
+			std::cout << "global" << std::endl;
+			for (std::string s : symbols) {
+				for (int i = 0; i < indent + 1; i++) std::cout << "--"; std::cout << ' ';
+				std::cout << s << std::endl;
+			}
 		}
 	};
 	class CallNode : public Node {

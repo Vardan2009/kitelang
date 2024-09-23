@@ -127,11 +127,13 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 }
 
 void compiler::Compiler::visit_extern(std::shared_ptr<parser::ExternNode> node) {
-	textSection.push_back("extern " + node->routine);
+	for(std::string symbol : node->symbols)
+		textSection.push_back("extern " + symbol);
 }
 
 void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) {
-	textSection.push_back("global " + node->routine);
+	for (std::string symbol : node->symbols)
+		textSection.push_back("global " + symbol);
 }
 
 void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) {
