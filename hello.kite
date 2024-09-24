@@ -1,6 +1,6 @@
 global _start
 
-% pointers!!!1
+% if statements!111!!
 fn _start() {
     if 1 {
         print("This should be printed\n")
