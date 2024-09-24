@@ -26,6 +26,7 @@ namespace parser {
 		LET,
 		VAR,
 		CMP,
+		IF,
 		ASM,
 		FOR,
 		LOOP,
@@ -271,6 +272,20 @@ namespace parser {
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << name << std::endl;
+		}
+	};
+	class IfNode : public Node {
+	public:
+		std::shared_ptr<Node> condition, block;
+		IfNode(std::shared_ptr<Node> condition, std::shared_ptr<Node> block)
+			: condition(condition), block(block) {
+			type = IF;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << "if" << std::endl;
+			condition->print(indent + 1);
+			block->print(indent + 1);
 		}
 	};
 	class CmpNode : public Node {

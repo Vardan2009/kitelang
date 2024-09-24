@@ -2,13 +2,14 @@ global _start
 
 % pointers!!!1
 fn _start() {
-    cmp 2 * 2 + 1, 2 * 2 + 1 {
-        eq {
-            print("eq")
-        }
-        neq {
-            print("neq")
-        }
+    if 1 {
+        print("This should be printed\n")
+    }
+    if 2 {
+        print("This should be printed\n")
+    }
+    if 0 {
+        print("This shouldn't be printed")
     }
 	return 0
 }
@@ -27,12 +28,13 @@ usage example:
     printc('V')
 ~
 fn printc() {
-    asm "mov rdx, 1"
-    asm "mov rsi, rdi"
-    asm "mov rax, 1"
-    asm "mov rdi, 1"
-    asm "syscall"
+    asm "mov rdx, 1"                % set the number of bytes to write (1)
+    asm "mov rsi, rdi"              % move the character to RSI (pointer to the character)
+    asm "mov rax, 1"                % syscall id for write
+    asm "mov rdi, 1"                % file descriptor (STDOUT)
+    asm "syscall"                   % invoke the syscall to print the character
 }
+
 ~
 print function
 args:
@@ -41,37 +43,37 @@ usage example:
     print("Hello World!")
 ~
 fn print() {
-    asm "push rdi"
-    asm "mov rax, 1"
-    asm "mov rdi, 1"
-    asm ".kprint_loop:"
-    asm "    mov rsi, [rsp]"
-    asm "    movzx rdx, byte [rsi]"
-    asm "    test rdx, rdx"
-    asm "    jz .kprint_done"
-    asm "    mov rax, 1"
-    asm "    mov rdi, 1"
-    asm "    mov rdx, 1"
-    asm "    syscall"
-    asm "    inc rsi"
-    asm "    mov [rsp], rsi"
-    asm "    jmp .kprint_loop"
-    asm ".kprint_done:"
-    asm "    pop rdi"
+    asm "push rdi"                      % preserve the pointer to the string on the stack
+    asm "mov rax, 1"                    % RAX - syscall id for write
+    asm "mov rdi, 1"                    % RDI - file descriptor (STDOUT)
+    asm ".kprint_loop:"                 % start of the printing loop
+    asm "    mov rsi, [rsp]"            % load the pointer to the string from the stack
+    asm "    movzx rdx, byte [rsi]"     % load the current character into RDX
+    asm "    test rdx, rdx"             % check if the character is 0 (null-terminator)
+    asm "    jz .kprint_done"           % if it is 0, jump to the end of the loop
+    asm "    mov rax, 1"                % prepare for syscall again
+    asm "    mov rdi, 1"                % (redundant (?)) RDI - STDOUT
+    asm "    mov rdx, 1"                % set the number of bytes to write (1)
+    asm "    syscall"                   % invoke the syscall to write the character
+    asm "    inc rsi"                   % move to the next character in the string
+    asm "    mov [rsp], rsi"            % update the pointer on the stack for the next iteration
+    asm "    jmp .kprint_loop"          % repeat the loop for the next character
+    asm ".kprint_done:"                 % end of the printing loop
+    asm "    pop rdi"                   % restore the original value of RDI
 }
 
 ~
 itoc function
 args:
     the ASCII integer (stored in rdi)
-usage exmaple:
+usage example:
     itoc(65) % 'A'
 ~
 fn itoc() {
-    asm "sub rsp, 8"  
-    asm "mov byte [rsp], dil"
-    asm "lea rax, [rsp]"
-    asm "add rsp, 8"  
+    asm "sub rsp, 8"                  % allocate space on the stack
+    asm "mov byte [rsp], dil"         % store the ASCII character in the stack
+    asm "lea rax, [rsp]"              % load the address of the character into RAX
+    asm "add rsp, 8"                  % deallocate the stack space
 }
 
 ~
@@ -82,13 +84,13 @@ usage example:
     printascii(65) % prints A
 ~
 fn printascii() {
-    asm "push rdi"
-    asm "mov rax, 1"
-    asm "mov rdi, 1"
-    asm "lea rsi, [rsp]"
-    asm "mov rdx, 1"
-    asm "syscall"
-    asm "pop rdi"
+    asm "push rdi"                    % preserve the original RDI value
+    asm "mov rax, 1"                  % syscall id for write
+    asm "mov rdi, 1"                  % file descriptor (STDOUT)
+    asm "lea rsi, [rsp]"              % load the address of the character from the stack
+    asm "mov rdx, 1"                  % number of bytes to write (1)
+    asm "syscall"                     % invoke the syscall to print the character
+    asm "pop rdi"                     % restore the original RDI value
 }
 
 ~
@@ -99,28 +101,28 @@ usage example:
     printi(10) % prints 10
 ~
 fn printi() {
-    asm "mov rbp, 0"
-    asm ".convert_loop:"
-    asm "mov rax, rdi"
-    asm "mov rbx, 10"
-    asm "xor rdx, rdx"
-    asm "div rbx"
-    asm "push rdx"
-    asm "inc rbp"
-    asm "mov rdi, rax"
-    asm "cmp rdi, 0"
-    asm "je .convert_loop_end"
-    asm "jmp .convert_loop"
-    asm ".convert_loop_end:"
-    asm ".print_loop:"
-    asm "pop rdi"
-    asm "add rdi, '0'"
-    asm "call printascii"
-    asm "dec rbp"
-    asm "test rbp, rbp"
-    asm "jz .print_end"
-    asm "jmp .print_loop"
-    asm ".print_end:"
+    asm "mov rbp, 0"                  % initialize a counter for digits
+    asm ".convert_loop:"               % start of the conversion loop
+    asm "mov rax, rdi"                 % move the integer to RAX for division
+    asm "mov rbx, 10"                 % divisor (base 10)
+    asm "xor rdx, rdx"                % clear RDX for the division
+    asm "div rbx"                     % divide RAX by 10; RAX = quotient, RDX = remainder
+    asm "push rdx"                    % push the remainder (next digit) onto the stack
+    asm "inc rbp"                     % increment the digit counter
+    asm "mov rdi, rax"                % update RDI with the quotient
+    asm "cmp rdi, 0"                  % check if the quotient is 0
+    asm "je .convert_loop_end"        % if 0, end conversion
+    asm "jmp .convert_loop"           % repeat for the next digit
+    asm ".convert_loop_end:"           % end of the conversion loop
+    asm ".print_loop:"                 % start of the printing loop
+    asm "pop rdi"                     % pop the next digit from the stack
+    asm "add rdi, '0'"                % convert the digit to ASCII
+    asm "call printascii"             % call printascii to print the character
+    asm "dec rbp"                     % decrement the digit counter
+    asm "test rbp, rbp"               % check if there are more digits
+    asm "jz .print_end"               % if 0, end printing
+    asm "jmp .print_loop"             % repeat for the next digit
+    asm ".print_end:"                  % end of the printing loop
 }
 
 ~
@@ -131,13 +133,13 @@ usage example:
     readc() % first character in stdin
 ~
 fn readc() {
-    @stackszinc 1
-    asm "sub rsp, 8"
-    asm "mov rdi, rsp"
-    asm "mov rax, 0"
-    asm "mov rdi, 0"
-    asm "mov rsi, rsp"
-    asm "mov rdx, 1"
-    asm "syscall"
-    asm "movzx rax, byte [rsp]"
+    @stackszinc 1                     % increase stack size (used for the compiler)
+    asm "sub rsp, 8"                  % allocate space on the stack
+    asm "mov rdi, rsp"                % set RDI to point to the stack space
+    asm "mov rax, 0"                  % syscall id for read
+    asm "mov rdi, 0"                  % file descriptor (STDIN)
+    asm "mov rsi, rsp"                % set RSI to point to the buffer (stack space)
+    asm "mov rdx, 1"                  % number of bytes to read (1)
+    asm "syscall"                     % invoke the syscall to read the character
+    asm "movzx rax, byte [rsp]"       % move the read character from the stack to RAX
 }

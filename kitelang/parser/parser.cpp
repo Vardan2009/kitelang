@@ -17,6 +17,7 @@ std::shared_ptr<parser::Node> parser::Parser::statement() {
 	if (stmt == "fn" && peek()->type == lexer::KEYWORD) return fn_node();
 	if (stmt == "return" && peek()->type == lexer::KEYWORD) return return_node();
 	if (stmt == "cmp" && peek()->type == lexer::KEYWORD) return cmp_node();
+	if (stmt == "if" && peek()->type == lexer::KEYWORD) return if_node();
 	if (stmt == "let" && peek()->type == lexer::KEYWORD) return let_node();
 	if (stmt == "asm" && peek()->type == lexer::KEYWORD) return asm_node();
 	if (stmt == "for" && peek()->type == lexer::KEYWORD) return for_node();
@@ -160,6 +161,13 @@ std::shared_ptr<parser::FnNode> parser::Parser::fn_node() {
 	consume(lexer::RPAREN);
 	std::shared_ptr<RootNode> root = statement_list();
 	return std::make_shared<FnNode>(name, argnames, root);
+}
+
+std::shared_ptr<parser::IfNode> parser::Parser::if_node() {
+	consume(lexer::KEYWORD, "if");
+	std::shared_ptr<Node> condition = expr();
+	std::shared_ptr<Node> block = statement();
+	return std::make_shared<IfNode>(condition, block);
 }
 
 std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {

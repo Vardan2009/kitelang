@@ -41,6 +41,7 @@ namespace compiler {
 		void visit_break();
 		void visit_continue();
 		void visit_cmp(std::shared_ptr<parser::CmpNode>);
+		void visit_if(std::shared_ptr<parser::IfNode>);
 		void visit_asm(std::shared_ptr<parser::AsmNode>);
 		void visit_for(std::shared_ptr<parser::ForNode>);
 		void visit_loop(std::shared_ptr<parser::LoopNode>);

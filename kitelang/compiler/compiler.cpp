@@ -22,6 +22,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::LET: return visit_let(std::static_pointer_cast<parser::LetNode>(node));
 	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
 	case parser::CMP: return visit_cmp(std::static_pointer_cast<parser::CmpNode>(node));
+	case parser::IF: return visit_if(std::static_pointer_cast<parser::IfNode>(node));
 	case parser::ASM: return visit_asm(std::static_pointer_cast<parser::AsmNode>(node));
 	case parser::FOR: return visit_for(std::static_pointer_cast<parser::ForNode>(node));
 	case parser::LOOP: return visit_loop(std::static_pointer_cast<parser::LoopNode>(node));
@@ -183,6 +184,17 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 		textSection.push_back("syscall");
 	}
 	textSection.push_back("ret");
+}
+
+void compiler::Compiler::visit_if(std::shared_ptr<parser::IfNode> node) {
+	int id = cmpLabelCount++;
+	visit_node(node->condition, "rax");
+	textSection.push_back("cmp rax, 0");
+	textSection.push_back("jne .if_true_" + std::to_string(id));
+	textSection.push_back("jmp .if_end_" + std::to_string(id));
+	textSection.push_back(".if_true_" + std::to_string(id) + ":");
+	visit_node(node->block);
+	textSection.push_back(".if_end_" + std::to_string(id) + ":");
 }
 
 void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {

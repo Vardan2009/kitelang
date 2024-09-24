@@ -19,6 +19,7 @@ namespace parser {
 		std::shared_ptr<FnNode> fn_node();
 		std::shared_ptr<ReturnNode> return_node();
 		std::shared_ptr<CmpNode> cmp_node();
+		std::shared_ptr<IfNode> if_node();
 		std::shared_ptr<AsmNode> asm_node();
 		std::shared_ptr<ForNode> for_node();
 		std::shared_ptr<LoopNode> loop_node();
