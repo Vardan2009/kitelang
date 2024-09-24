@@ -26,6 +26,8 @@ args:
     the character (stored in rdi)
 usage example:
     printc('V')
+returns:
+    none
 ~
 fn printc() {
     asm "mov rdx, 1"                % set the number of bytes to write (1)
@@ -41,6 +43,8 @@ args:
     the pointer to the string (stored in rdi)
 usage example:
     print("Hello World!")
+returns:
+    none
 ~
 fn print() {
     asm "push rdi"                      % preserve the pointer to the string on the stack
@@ -68,6 +72,8 @@ args:
     the ASCII integer (stored in rdi)
 usage example:
     itoc(65) % 'A'
+returns:
+    a character pointer with given ASCII value
 ~
 fn itoc() {
     asm "sub rsp, 8"                  % allocate space on the stack
@@ -82,6 +88,8 @@ args:
     the ASCII integer (stored in rdi)
 usage example:
     printascii(65) % prints A
+returns:
+    none
 ~
 fn printascii() {
     asm "push rdi"                    % preserve the original RDI value
@@ -99,6 +107,8 @@ args:
     the integer (stored in rdi)
 usage example:
     printi(10) % prints 10
+returns:
+    none
 ~
 fn printi() {
     asm "mov rbp, 0"                  % initialize a counter for digits
@@ -131,6 +141,8 @@ args:
     none
 usage example:
     readc() % first character in stdin
+returns:
+    the ASCII integer of the inputted character
 ~
 fn readc() {
     @stackszinc 1                     % increase stack size (used for the compiler)
@@ -151,6 +163,9 @@ args:
     second comparison value (stored in rsi)
 usage example:
     iseq(1, 1) % 1
+returns:
+    1 if the values are equal,
+    0 if not
 ~
 fn iseq(a, b) {
     cmp ^rdi, ^rsi {
