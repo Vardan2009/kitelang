@@ -5,11 +5,13 @@ fn _start() {
     if iseq(1, 1) {
         print("This should be printed\n")
     }
-    if iseq(2, 2) {
+
+    if iseq(2, 2)
         print("This should be printed\n")
-    }
+
     if iseq(1, 5) {
         print("This shouldn't be printed")
+        return 1
     }
 	return 0
 }
