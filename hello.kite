@@ -2,13 +2,13 @@ global _start
 
 % if statements!111!!
 fn _start() {
-    if 1 {
+    if iseq(1, 1) {
         print("This should be printed\n")
     }
-    if 2 {
+    if iseq(2, 2) {
         print("This should be printed\n")
     }
-    if 0 {
+    if iseq(1, 5) {
         print("This shouldn't be printed")
     }
 	return 0
@@ -142,4 +142,21 @@ fn readc() {
     asm "mov rdx, 1"                  % number of bytes to read (1)
     asm "syscall"                     % invoke the syscall to read the character
     asm "movzx rax, byte [rsp]"       % move the read character from the stack to RAX
+}
+
+~
+iseq function
+args:
+    first comparison value  (stored in rdi)
+    second comparison value (stored in rsi)
+usage example:
+    iseq(1, 1) % 1
+~
+fn iseq(a, b) {
+    cmp ^rdi, ^rsi {
+        eq {
+            return 1
+        }
+    }
+    return 0
 }
