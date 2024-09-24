@@ -118,7 +118,11 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 	//	 textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
 	// }
 	for (int i = 0; i < node->args.size(); i++) {
-		visit_node(node->args[i], argregs[i]);
+		visit_node(node->args[i], "rax");
+		push("rax");
+	}
+	for (int i = 0; i < node->args.size(); i++) {
+		pop(argregs[i]);
 	}
 	textSection.push_back("call " + node->routine);
 
@@ -183,7 +187,11 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 
 void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 	visit_node(node->val1, "rax");
-	visit_node(node->val2, "rbx");
+	push("rax");
+	visit_node(node->val2, "rax");
+	push("rax");
+	pop("rbx");
+	pop("rax");
 	textSection.push_back("cmp rax, rbx");
 	int id = cmpLabelCount++;
 	for (std::map<std::string, std::shared_ptr<parser::RootNode>>::const_iterator iter = node->comparisons.begin(); iter != node->comparisons.end(); ++iter) {

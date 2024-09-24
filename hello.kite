@@ -2,17 +2,14 @@ global _start
 
 % pointers!!!1
 fn _start() {
-    let value = 20
-    let ptr = &value
-    print("The Value: ")
-    printi(value)
-    printc('\n')
-    print("The Address: ")
-    printi(ptr)
-    printc('\n')
-    print("Dereferenced Pointer Value: ")
-    printi(*ptr)
-    printc('\n')
+    cmp 2 * 2 + 1, 2 * 2 + 1 {
+        eq {
+            print("eq")
+        }
+        neq {
+            print("neq")
+        }
+    }
 	return 0
 }
 
