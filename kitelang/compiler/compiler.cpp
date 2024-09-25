@@ -182,6 +182,7 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	int amtToClear = visit_root_with_scope_return_amt(node->root);
 	textSection.push_back(node->name + "_end:");
 	textSection.push_back("add rsp, " + std::to_string(amtToClear));
+	stacksize -= amtToClear;
 	for (int i = 0; i < node->argnames.size(); i++) {
 		pop();
 	}
