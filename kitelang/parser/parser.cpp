@@ -36,19 +36,24 @@ std::shared_ptr<parser::CompDirectNode> parser::Parser::comp_direct() {
 
 std::shared_ptr<parser::Node> parser::Parser::expr() {
 	std::shared_ptr<Node> n = term();
-	while (peek()->type == lexer::PLUS || peek()->type == lexer::MINUS) {
-		std::shared_ptr<lexer::Token> op = advance();
-		std::shared_ptr<Node> r = term();
-		n = std::make_shared<BinOpNode>(n, op->type, r);
+
+	while (true) {
+		auto current_token_type = peek()->type;
+
+		if (current_token_type == lexer::PLUS || current_token_type == lexer::MINUS ||
+			current_token_type == lexer::EQEQ || current_token_type == lexer::NEQEQ ||
+			current_token_type == lexer::GT || current_token_type == lexer::LT ||
+			current_token_type == lexer::GTE || current_token_type == lexer::LTE) {
+
+			std::shared_ptr<lexer::Token> op = advance();
+			std::shared_ptr<Node> r = term();
+			n = std::make_shared<BinOpNode>(n, op->type, r);
+		}
+		else break;
 	}
-	if (peek()->type == lexer::EQ) {
-		std::shared_ptr<lexer::Token> op = advance();
-		std::shared_ptr<Node> r = expr();
-		n = std::make_shared<BinOpNode>(n, op->type, r);
-	}
+
 	return n;
 }
-
 
 std::shared_ptr<parser::Node> parser::Parser::term() {
 	std::shared_ptr<Node> n = factor();

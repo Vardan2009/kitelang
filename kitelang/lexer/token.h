@@ -22,7 +22,13 @@ namespace lexer {
 		EQ,
 		CDIRECT,
 		ADDROF,
-		DEREF
+		DEREF,
+		EQEQ,
+		NEQEQ,
+		GT,
+		LT,
+		GTE,
+		LTE
 	} token_t;
 
 	// Token class

@@ -26,6 +26,15 @@ namespace lexer {
 			{'}', lexer::RBRACE},
 			{',', lexer::COMMA},
 			{'=', lexer::EQ},
+			{'>', lexer::GT},
+			{'<', lexer::LT},
+		};
+		// map of each special two characters to its token type
+		std::map<std::string, lexer::token_t> specialsTwoChar = {
+			{"==", lexer::EQEQ},
+			{"!=", lexer::NEQEQ},
+			{">=", lexer::GTE},
+			{"<=", lexer::LTE},
 		};
 		// map of each prefix and its token type
 		std::map<char, lexer::token_t> prefixes = {
@@ -48,7 +57,8 @@ namespace lexer {
 		token_ptr make_char();               // for making and returning a char token                    (e.g `'A'`)
 		token_ptr make_identifier();         // for making and returning a keyword or identifier token   (e.g `varName` or `let`)
 		token_ptr make_special();            // for making and returning a special character token       (e.g `+` or `~`)
-		token_ptr make_with_prefix(token_t); // for making and returning an identifier with a prefix      (e.g `^rax` or `*ptr`)
+		token_ptr make_special_two();        // for making and returning a special token with two chars  (e.g `==` or `!=`)
+		token_ptr make_with_prefix(token_t); // for making and returning an identifier with a prefix     (e.g `^rax` or `*ptr`)
 		void skip_comment();                 // for skipping single line comments                        (e.g % test)
 		void skip_multiline_comment();       // for skipping multiline comments                          (e.g ~ test ~)
 	public:

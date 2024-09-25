@@ -1,18 +1,24 @@
 global _start
 
-% if statements!111!!
+% BOOLEANS, FINALLY!
 fn _start() {
-    if iseq(1, 1) {
+    let x = 1
+    let bool = 5 > 2
+
+    if x == 1 {
         print("This should be printed\n")
     }
 
-    if iseq(2, 2)
+    if bool print("This should be printed\n")
+
+    if x != 2
         print("This should be printed\n")
 
-    if iseq(1, 5) {
-        print("This shouldn't be printed")
+    if 3 < x {
+        print("This shouldn't be printed\n")
         return 1
     }
+
 	return 0
 }
 

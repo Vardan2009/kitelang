@@ -282,7 +282,7 @@ void compiler::Compiler::visit_cdirect(std::shared_ptr<parser::CompDirectNode> n
 	}
 }
 
-// this part is kinda complicated
+// this part is VERY complicated
 void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, std::string reg) {
 	// Check operator precedence
 	if (node->operation == lexer::PLUS || node->operation == lexer::MINUS) {
@@ -327,7 +327,52 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			textSection.push_back("idiv rbx");
 		}
 	}
-	else if (node->operation == lexer::EQ) { // if the operation is assignment <varname> = <expr>
+	// Handle comparison operators
+	else if (node->operation == lexer::EQEQ || node->operation == lexer::NEQEQ ||
+		node->operation == lexer::GT || node->operation == lexer::LT ||
+		node->operation == lexer::GTE || node->operation == lexer::LTE) {
+
+		visit_node(node->left, "rax");
+		visit_node(node->right, "rbx");
+
+		int id = cmpLabelCount++;
+		std::string label_true = "boolop_true_" + std::to_string(id);
+		std::string label_end = "boolop_end_" + std::to_string(id);
+
+		// Perform comparison
+		if (node->operation == lexer::EQEQ) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("je " + label_true);
+		}
+		else if (node->operation == lexer::NEQEQ) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("jne " + label_true);
+		}
+		else if (node->operation == lexer::GT) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("jg " + label_true);
+		}
+		else if (node->operation == lexer::LT) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("jl " + label_true);
+		}
+		else if (node->operation == lexer::GTE) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("jge " + label_true);
+		}
+		else if (node->operation == lexer::LTE) {
+			textSection.push_back("cmp rax, rbx");
+			textSection.push_back("jle " + label_true);
+		}
+
+		// If the condition is false, jump to the end
+		textSection.push_back("mov rax, 0");
+		textSection.push_back("jmp " + label_end);
+		textSection.push_back(label_true + ":");
+		textSection.push_back("mov rax, 1"); // True condition
+		textSection.push_back(label_end + ":");
+	}
+	else if (node->operation == lexer::EQ) { // Assignment
 		visit_node(node->right, "rax"); // store the new value in rax
 		if (node->left->type != parser::VAR)
 			throw std::runtime_error("LHS of assignment should be variable");
@@ -336,9 +381,10 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 	}
 
 	// Store the result in the appropriate register
-	if(node->operation != lexer::EQ)
+	if (node->operation != lexer::EQ)
 		textSection.push_back("mov " + reg + ", rax");
 }
+
 
 int compiler::Compiler::get_variable_offset(std::string varname) {
 	return (stacksize - 1 - vars[varname]) * 8;
