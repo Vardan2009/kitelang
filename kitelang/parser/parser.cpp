@@ -49,6 +49,11 @@ std::shared_ptr<parser::Node> parser::Parser::expr() {
 			std::shared_ptr<Node> r = term();
 			n = std::make_shared<BinOpNode>(n, op->type, r);
 		}
+		else if (current_token_type == lexer::EQ) {
+			std::shared_ptr<lexer::Token> op = advance();
+			std::shared_ptr<Node> r = expr();
+			n = std::make_shared<BinOpNode>(n, op->type, r);
+		}
 		else break;
 	}
 

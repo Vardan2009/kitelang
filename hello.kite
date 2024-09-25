@@ -1,25 +1,22 @@
 global _start
 
-% BOOLEANS, FINALLY!
 fn _start() {
-    let x = 1
-    let bool = 5 > 2
-
-    if x == 1 {
-        print("This should be printed\n")
-    }
-
-    if bool print("This should be printed\n")
-
-    if x != 2
-        print("This should be printed\n")
-
-    if 3 < x {
-        print("This shouldn't be printed\n")
-        return 1
-    }
-
+    printi(nfib(5))
 	return 0
+}
+
+fn nfib(n) {
+    let a = 0
+    let b = 1
+    let c = 0
+    let i = 0
+    if n == 0 return a
+    for i = 2 to n step 1 {
+        c = a + b
+        a = b
+        b = c
+    }
+    return b
 }
 
 ~
@@ -165,7 +162,7 @@ fn readc() {
 }
 
 ~
-iseq function
+iseq function (redundant, use `==` operator instead)
 args:
     first comparison value  (stored in rdi)
     second comparison value (stored in rsi)

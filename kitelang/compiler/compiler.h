@@ -26,6 +26,7 @@ namespace compiler {
 		void visit_node(std::shared_ptr<parser::Node>, std::string = "");
 		void visit_root(std::shared_ptr<parser::RootNode>);
 		void visit_root_with_scope(std::shared_ptr<parser::RootNode>);
+		int visit_root_with_scope_return_amt(std::shared_ptr<parser::RootNode>);
 		void visit_int_lit(std::shared_ptr<parser::IntLitNode>, std::string);
 		void visit_char_lit(std::shared_ptr<parser::CharLitNode>, std::string);
 		void visit_reg(std::shared_ptr<parser::RegNode>, std::string);

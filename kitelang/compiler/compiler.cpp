@@ -51,6 +51,16 @@ void compiler::Compiler::visit_root_with_scope(std::shared_ptr<parser::RootNode>
 	vars = oldvars;
 }
 
+int compiler::Compiler::visit_root_with_scope_return_amt(std::shared_ptr<parser::RootNode> node) {
+	std::map<std::string, int> oldvars(vars);
+	int oldStackSize = stacksize;
+	for (std::shared_ptr<parser::Node> n : node->statements) {
+		visit_node(n);
+	}
+	vars = oldvars;
+	return (stacksize - oldStackSize) * 8;
+}
+
 void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node, std::string reg) {
 	textSection.push_back("mov " + reg + ", " + std::to_string(node->value));
 }
@@ -169,8 +179,9 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 		vars[node->argnames[i]] = stacksize;
 		push(argregs[i]);
 	}
-	visit_root_with_scope(node->root);
+	int amtToClear = visit_root_with_scope_return_amt(node->root);
 	textSection.push_back(node->name + "_end:");
+	textSection.push_back("add rsp, " + std::to_string(amtToClear));
 	for (int i = 0; i < node->argnames.size(); i++) {
 		pop();
 	}
