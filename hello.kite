@@ -1,7 +1,14 @@
 global _start
 
 fn _start() {
-    printi(nfib(5))
+    let x = 10
+    print("First ")
+    printi(x)
+    print(" values of the Fibonacci Sequence\n")
+    for i = 1 to x step 1 {
+        printi(nfib(i))
+        if i != x print(", ")
+    }
 	return 0
 }
 
