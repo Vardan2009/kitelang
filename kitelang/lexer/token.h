@@ -28,7 +28,9 @@ namespace lexer {
 		GT,
 		LT,
 		GTE,
-		LTE
+		LTE,
+		LSQR,
+		RSQR
 	} token_t;
 
 	// Token class

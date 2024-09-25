@@ -33,6 +33,7 @@ namespace compiler {
 		void visit_addrof(std::shared_ptr<parser::AddrOfNode>, std::string);
 		void visit_deref(std::shared_ptr<parser::DerefNode>, std::string);
 		void visit_var(std::shared_ptr<parser::VarNode>, std::string);
+		void visit_idx(std::shared_ptr<parser::IndexNode>, std::string);
 		void visit_string_lit(std::shared_ptr<parser::StringLitNode>, std::string);
 		void visit_call(std::shared_ptr<parser::CallNode>, std::string);
 		void visit_extern(std::shared_ptr<parser::ExternNode>);

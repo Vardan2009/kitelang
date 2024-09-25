@@ -28,6 +28,8 @@ namespace lexer {
 			{'=', lexer::EQ},
 			{'>', lexer::GT},
 			{'<', lexer::LT},
+			{'[', lexer::LSQR},
+			{']', lexer::RSQR},
 		};
 		// map of each special two characters to its token type
 		std::map<std::string, lexer::token_t> specialsTwoChar = {

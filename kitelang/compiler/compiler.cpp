@@ -18,6 +18,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::REG: return visit_reg(std::static_pointer_cast<parser::RegNode>(node), reg);
 	case parser::STRING_LIT: return visit_string_lit(std::static_pointer_cast<parser::StringLitNode>(node), reg);
 	case parser::VAR: return visit_var(std::static_pointer_cast<parser::VarNode>(node), reg);
+	case parser::IDX: return visit_idx(std::static_pointer_cast<parser::IndexNode>(node), reg);
 	case parser::BINOP: return visit_binop(std::static_pointer_cast<parser::BinOpNode>(node), reg);
 	case parser::LET: return visit_let(std::static_pointer_cast<parser::LetNode>(node));
 	case parser::ROOT: return visit_root_with_scope(std::static_pointer_cast<parser::RootNode>(node));
@@ -94,6 +95,17 @@ void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::s
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
+
+void compiler::Compiler::visit_idx(std::shared_ptr<parser::IndexNode> node, std::string reg) {
+	if (vars.find(node->name) == vars.end())
+		throw std::runtime_error("variable " + node->name + " is not present in this context");
+	visit_node(node->index, "rbx");
+	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
+	textSection.push_back("imul rbx, rbx, 8");
+	textSection.push_back("add " + reg + ", rbx");
+	textSection.push_back("mov " + reg + ", [" + reg + "]");
+}
+
 
 void compiler::Compiler::visit_string_lit(std::shared_ptr<parser::StringLitNode> node, std::string reg) {
 	std::string processedLiteral;
@@ -277,9 +289,17 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 }
 
 void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
-	visit_node(node->root, "rax");
-	vars[node->name] = stacksize;
-	push("rax");
+	if (node->isAlloc) {
+		textSection.push_back("sub rsp, " + std::to_string(node->allocVal));
+		stacksize += node->allocVal / 8;
+		vars[node->name] = stacksize;
+		push("rsp");
+	}
+	else {
+		visit_node(node->root, "rax");
+		vars[node->name] = stacksize;
+		push("rax");
+	}
 }
 
 void compiler::Compiler::visit_cdirect(std::shared_ptr<parser::CompDirectNode> node) {
@@ -386,10 +406,21 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 	}
 	else if (node->operation == lexer::EQ) { // Assignment
 		visit_node(node->right, "rax"); // store the new value in rax
-		if (node->left->type != parser::VAR)
-			throw std::runtime_error("LHS of assignment should be variable");
-
-		textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], rax"); // move the result from rax to the stack
+		if (node->left->type == parser::VAR) // regular variable (x)
+			textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], rax"); // move the result from rax to the stack
+		else if (node->left->type == parser::DEREF) { // variable dereference pointer (*x)
+			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::DerefNode>(node->left)->name)) +"]");
+			textSection.push_back("mov [rbx], rax");
+		}
+		else if (node->left->type == parser::IDX) {  // index access pointer (x[i])
+			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
+			visit_node(n->index, "rcx");
+			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
+			textSection.push_back("imul rcx, rcx, 8");
+			textSection.push_back("add rbx, rcx");
+			textSection.push_back("mov [rbx], rax");
+		}
+		else throw std::runtime_error("invalid LHS of assignment");
 	}
 
 	// Store the result in the appropriate register

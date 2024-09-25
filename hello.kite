@@ -1,13 +1,14 @@
 global _start
 
+% ARRAYS!!!!
 fn _start() {
-    let x = 10
-    print("First ")
-    printi(x)
-    print(" values of the Fibonacci Sequence\n")
-    for i = 1 to x step 1 {
-        printi(nfib(i))
-        if i != x print(", ")
+    let x[3]
+    x[0] = 10
+    x[1] = 20
+    x[2] = 30
+    for i = 0 to 2 step 1 {
+        printi(x[i])
+        printc('\n')
     }
 	return 0
 }

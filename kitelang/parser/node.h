@@ -25,6 +25,7 @@ namespace parser {
 		CONTINUE,
 		CALL,
 		LET,
+		IDX,
 		VAR,
 		CMP,
 		IF,
@@ -216,14 +217,34 @@ namespace parser {
 	public:
 		std::string name;
 		std::shared_ptr<Node> root;
+		bool isAlloc = false;
+		int allocVal = -1;
 		LetNode(std::string rout, std::shared_ptr<Node> rt)
 			: name(rout), root(rt) {
+			type = LET;
+		}
+		LetNode(std::string rout, int allocVal)
+			: name(rout), allocVal(allocVal), isAlloc(true){
 			type = LET;
 		}
 		void print(int indent = 0) const {
 			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
 			std::cout << "let " << name << std::endl;
 			root->print(indent + 1);
+		}
+	};
+	class IndexNode : public Node {
+	public:
+		std::string name;
+		std::shared_ptr<Node> index;
+		IndexNode(std::string rout, std::shared_ptr<Node> idx)
+			: name(rout), index(idx) {
+			type = IDX;
+		}
+		void print(int indent = 0) const {
+			for (int i = 0; i < indent; i++) std::cout << "--"; std::cout << ' ';
+			std::cout << name << std::endl;
+			index->print(indent + 1);
 		}
 	};
 	class VarNode : public Node {

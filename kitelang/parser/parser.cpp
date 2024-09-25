@@ -94,17 +94,25 @@ std::shared_ptr<parser::Node> parser::Parser::factor() {
 	case lexer::IDENTIFIER:
 		{
 			std::string name = advance()->value_str;
-			if (peek()->type != lexer::LPAREN)
-				return std::make_shared<VarNode>(name);
-			consume(lexer::LPAREN);
-			std::vector<std::shared_ptr<Node>> args;
-			while (peek()->type != lexer::RPAREN) {
-				args.push_back(expr());
-				if (peek()->type != lexer::COMMA) break;
-				consume(lexer::COMMA);
+			if (peek()->type == lexer::LSQR) {
+				consume(lexer::LSQR);
+				std::shared_ptr<Node> index = expr();
+				consume(lexer::RSQR);
+				return std::make_shared<IndexNode>(name, index);
 			}
-			consume(lexer::RPAREN);
-			return std::make_shared<CallNode>(name, args);
+			else if (peek()->type == lexer::LPAREN) {
+				consume(lexer::LPAREN);
+				std::vector<std::shared_ptr<Node>> args;
+				while (peek()->type != lexer::RPAREN) {
+					args.push_back(expr());
+					if (peek()->type != lexer::COMMA) break;
+					consume(lexer::COMMA);
+				}
+				consume(lexer::RPAREN);
+				return std::make_shared<CallNode>(name, args);
+			}
+			else
+				return std::make_shared<VarNode>(name);
 		}
 	default:
 		throw std::runtime_error("invalid factor " + std::to_string(peek()->type));
@@ -223,9 +231,20 @@ std::shared_ptr<parser::ForNode> parser::Parser::for_node() {
 std::shared_ptr<parser::LetNode> parser::Parser::let_node() {
 	consume(lexer::KEYWORD, "let");
 	std::string name = advance()->value_str;
-	consume(lexer::EQ);
-	std::shared_ptr<Node> root = expr();
-	return std::make_shared<LetNode>(name, root);
+	if (peek()->type == lexer::EQ) {
+		consume(lexer::EQ);
+		std::shared_ptr<Node> root = expr();
+		return std::make_shared<LetNode>(name, root);
+	}
+	else if (peek()->type == lexer::LSQR) {
+		consume(lexer::LSQR);
+		if (peek()->type != lexer::INT_LIT)
+			throw std::runtime_error("allocation size should be an integer literal");
+		int allocVal = 8 * advance()->value;
+		consume(lexer::RSQR);
+		return std::make_shared<LetNode>(name, allocVal);
+	}
+	else throw std::runtime_error("expected [ or = after let");
 }
 
 std::shared_ptr<lexer::Token> parser::Parser::peek() {
