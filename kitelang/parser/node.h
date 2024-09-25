@@ -8,6 +8,7 @@
 
 namespace parser {
 	typedef enum {
+		NONE,
 		ROOT,
 		BINOP,
 		STRING_LIT,
@@ -34,7 +35,7 @@ namespace parser {
 	} node_t;
 	class Node {
 	public:
-		node_t type;
+		node_t type = NONE;
 		virtual void print(int) const = 0;
 	};
 	class RootNode : public Node {

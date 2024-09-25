@@ -22,10 +22,10 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		else if (src[ptr] == '\'')
 			result.push_back(make_char());
 		// if it is an identifier with prefix
-		else if (prefixes.count(src[ptr]) && isalpha(src[ptr + 1]))
+		else if (prefixes.count(src[ptr]) && isalpha(src[(ptr + 1)]))
 			result.push_back(make_with_prefix(prefixes[src[ptr]]));
 		// then it is a special token (with two characters)
-		else if ((ptr < src.size() - 1) && (specialsTwoChar.count(std::string(1, src[ptr]) + src[ptr + 1])))
+		else if ((ptr < src.size() - 1) && (specialsTwoChar.count(std::string(1, src[ptr]) + src[(ptr + 1)])))
 			result.push_back(make_special_two());
 		else if (specials.count(src[ptr]))
 			result.push_back(make_special());
@@ -156,7 +156,7 @@ token_ptr lexer::Lexer::make_special() {
 token_ptr lexer::Lexer::make_special_two() {
 	// get the token type and value from the specialsTwoChar map (lexer.h)
 	std::string key(1, src[ptr]);
-	key += src[ptr + 1];
+	key += src[(ptr + 1)];
 	token_ptr e = std::make_shared<Token>(
 		specialsTwoChar[
 			key

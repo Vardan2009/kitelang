@@ -46,6 +46,7 @@ namespace lexer {
 		}
 		// constructor with string value
 		Token(token_t type, std::string value_str) {
+			this->value = -1;
 			this->type = type;
 			this->value_str = value_str;
 		}

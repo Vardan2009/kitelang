@@ -15,7 +15,7 @@ namespace compiler {
 			{"neq", "jne"},
 		};
 		std::string curFn;							// the current function the compiler is inside
-		int curLoopId;								// the current loop ID the compiler is inside
+		int curLoopId = 0;							// the current loop ID the compiler is inside
 		std::shared_ptr<parser::Node> curLoop;	    // the current loop the compiler is inside
 		int cmpLabelCount = 0;
 		int dataSectionCount = 0;
@@ -59,7 +59,7 @@ namespace compiler {
 		void pop(std::string);
 		void pop();
 	public:
-		Compiler(std::shared_ptr<parser::RootNode> r) : root(r), dataSectionCount(0) {}
+		Compiler(std::shared_ptr<parser::RootNode> r) : root(r), dataSectionCount(0), curLoopId(0) {}
 		void codegen();
 		void print(std::ostream& stream) {
 			stream << "section .data" << std::endl;
