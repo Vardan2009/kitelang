@@ -220,9 +220,9 @@ std::shared_ptr<parser::ForNode> parser::Parser::for_node() {
 	std::string itername = advance()->value_str;
 	consume(lexer::EQ);
 	std::shared_ptr<Node> initVal = expr();
-	consume(lexer::KEYWORD, "to");
+	consume(lexer::ARROW);
 	std::shared_ptr<Node> targetVal = expr();
-	consume(lexer::KEYWORD, "step");
+	consume(lexer::CARET);
 	std::shared_ptr<Node> stepVal = expr();
 	std::shared_ptr<Node> root = statement();
 	return std::make_shared<ForNode>(itername, root, initVal, targetVal, stepVal);

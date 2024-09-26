@@ -30,6 +30,9 @@ namespace lexer {
 			{'<', lexer::LT},
 			{'[', lexer::LSQR},
 			{']', lexer::RSQR},
+			{']', lexer::RSQR},
+			{':', lexer::COLON},
+			{'^', lexer::CARET},
 		};
 		// map of each special two characters to its token type
 		std::map<std::string, lexer::token_t> specialsTwoChar = {
@@ -37,6 +40,7 @@ namespace lexer {
 			{"!=", lexer::NEQEQ},
 			{">=", lexer::GTE},
 			{"<=", lexer::LTE},
+			{"->", lexer::ARROW},
 		};
 		// map of each prefix and its token type
 		std::map<char, lexer::token_t> prefixes = {

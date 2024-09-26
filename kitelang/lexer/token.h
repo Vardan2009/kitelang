@@ -30,7 +30,10 @@ namespace lexer {
 		GTE,
 		LTE,
 		LSQR,
-		RSQR
+		RSQR,
+		COLON,
+		CARET,
+		ARROW
 	} token_t;
 
 	// Token class
