@@ -142,21 +142,43 @@ std::shared_ptr<parser::GlobalNode> parser::Parser::global_node() {
 std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 	consume(lexer::KEYWORD, "extern");
 	if (peek()->type == lexer::LBRACE) {
-		std::vector<std::string> symbols {};
+		std::vector<ktypes::kfndec_t> fns {};
 		consume(lexer::LBRACE);
 		while (peek()->type != lexer::RBRACE) {
 			if (peek()->type != lexer::IDENTIFIER)
 				throw std::runtime_error("expected identifier");
-			symbols.push_back(advance()->value_str);
+			std::string name = advance()->value_str;
+			std::vector<ktypes::ktype_t> types{};
+			consume(lexer::LPAREN);
+			while (peek()->type != lexer::RPAREN) {
+				types.push_back(type());
+				if (peek()->type == lexer::RPAREN) break;
+				consume(lexer::COMMA);
+			}
+			consume(lexer::RPAREN);
+			consume(lexer::COLON);
+			ktypes::ktype_t returns = type();
+			fns.push_back(ktypes::kfndec_t{name, types, returns});
 			if (peek()->type == lexer::RBRACE) break;
 			consume(lexer::COMMA);
 		}
 		consume(lexer::RBRACE);
-		return std::make_shared<ExternNode>(symbols);
+		return std::make_shared<ExternNode>(fns);
 	}
 	if (peek()->type != lexer::IDENTIFIER)
 		throw std::runtime_error("expected identifier");
-	return std::make_shared<ExternNode>(std::vector<std::string>{ advance()->value_str });
+	std::string name = advance()->value_str;
+	std::vector<ktypes::ktype_t> types;
+	consume(lexer::LPAREN);
+	while (peek()->type != lexer::RPAREN) {
+		types.push_back(type());
+		if (peek()->type == lexer::RPAREN) break;
+		consume(lexer::COMMA);
+	}
+	consume(lexer::RPAREN);
+	consume(lexer::COLON);
+	ktypes::ktype_t returns = type();
+	return std::make_shared<ExternNode>(std::vector<ktypes::kfndec_t>{ ktypes::kfndec_t{ name, types, returns } });
 }
 
 std::shared_ptr<parser::ReturnNode> parser::Parser::return_node() {

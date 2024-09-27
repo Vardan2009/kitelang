@@ -7,10 +7,6 @@
 #include "../parser/parser.h"
 
 namespace compiler {
-	typedef struct {
-		std::vector<ktypes::ktype_t> argtps;
-		ktypes::ktype_t returns;
-	} kfndec_t;
 
 	class Compiler {
 	private:
@@ -116,7 +112,7 @@ namespace compiler {
 
 		std::map<std::string, int> varlocs{};
 		std::map<std::string, ktypes::ktype_t> vartypes {};
-		std::map<std::string, kfndec_t> fns {};
+		std::map<std::string, ktypes::kfndec_t> fns {};
 		int stacksize = 0;
 		void push(std::string);
 		void pop(std::string);

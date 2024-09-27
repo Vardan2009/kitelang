@@ -7,7 +7,7 @@ void compiler::Compiler::codegen() {
 			std::vector<ktypes::ktype_t> types;
 			for (int i = 0; i < node->args.size(); i++)
 				types.push_back(node->args[i].type);
-			fns[node->name] = kfndec_t{ types, node->returns };
+			fns[node->name] = ktypes::kfndec_t{ node->name, types, node->returns };
 		}
 	}
 	visit_root(root);
@@ -179,8 +179,10 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 }
 
 void compiler::Compiler::visit_extern(std::shared_ptr<parser::ExternNode> node) {
-	for(std::string symbol : node->symbols)
-		textSection.push_back("extern " + symbol);
+	for (ktypes::kfndec_t symbol : node->symbols) {
+		textSection.push_back("extern " + symbol.name);
+		fns[symbol.name] = symbol;
+	}
 }
 
 void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) {

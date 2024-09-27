@@ -1,8 +1,8 @@
 global _start
 
 % TYPES!!!!
-fn _start() : int {
-    let alphabet : char[52] % 26 letters in the alphabet * 2
+fn _start() : byte {
+    let alphabet : char[52] % 2(26 letters in the alphabet)
     let counter : int32 = 0
 
     % i in for loops is automatically int64
