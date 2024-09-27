@@ -18,9 +18,9 @@ fn _start() : byte {
 ```
 global _start
 extern {
-  print(ptr),
+  print(ptr64),
   printi(int64),
-  printc(ptr)
+  printc(ptr64)
 }
 
 fn _start() : byte {
@@ -60,14 +60,14 @@ fn factor(a : int64, b : int64) : int64 {
 ```
 global _start
 extern {
-  print(ptr),
+  print(ptr64),
   printi(int64),
-  printc(ptr)
+  printc(ptr64)
 }
 
 fn _start() : byte {
   let value : byte = 20
-  let vptr : ptr = &value
+  let vptr : ptr8 = &value
 
   print("The Value: ")
   printi(value)
