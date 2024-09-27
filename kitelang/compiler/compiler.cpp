@@ -167,10 +167,10 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 
 	for (int i = 0; i < node->args.size(); i++) {
 		visit_node(node->args[i], txbreg("rax", fns[node->routine].argtps[i]));
-		push("rax");
+		push("rax", fns[node->routine].argtps[i]);
 	}
 
-	for (int i = 0; i < node->args.size(); i++)
+	for (int i = node->args.size() - 1; i >= 0; i--)
 		pop(argregs[i]);
 
 	textSection.push_back("call " + node->routine);
@@ -217,7 +217,7 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	std::map<std::string, int> oldvars(varlocs);
 	for (int i = 0; i < node->args.size(); i++) {
 		varlocs[node->args[i].name] = stacksize;
-		push(argregs[i]);
+		push(argregs[i], node->args[i].type);
 	}
 	int amtToClear = visit_root_with_scope_return_amt(node->root);
 	textSection.push_back(node->name + "_end:");
@@ -250,9 +250,9 @@ void compiler::Compiler::visit_if(std::shared_ptr<parser::IfNode> node) {
 
 void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
 	visit_node(node->val1, "rax");
-	push("rax");
+	push("rax", ktypes::INT64);
 	visit_node(node->val2, "rax");
-	push("rax");
+	push("rax", ktypes::INT64);
 	pop("rbx");
 	pop("rax");
 	textSection.push_back("cmp rax, rbx");
@@ -296,7 +296,7 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	visit_node(node->initVal, "rax");
 	int oldStackSize = stacksize;
 	varlocs[node->itername] = stacksize;
-	push("rax");
+	push("rax", ktypes::INT64);
 
 	textSection.push_back("loop_" + std::to_string(id) + ":");
 	if (node->type == parser::ROOT) visit_root(std::static_pointer_cast<parser::RootNode>(node->root));
@@ -325,13 +325,13 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 		}
 		varlocs[node->name] = stacksize;
 		vartypes[node->name] = node->varType;
-		push("rsp");
+		push("rsp", ktypes::INT64);
 	}
 	else {
 		visit_node(node->root, txbreg("rax", node->varType));
 		vartypes[node->name] = node->varType;
 		varlocs[node->name] = stacksize;
-		push("rax");
+		push("rax", node->varType);
 	}
 }
 
@@ -359,7 +359,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			auto right_binop = std::static_pointer_cast<parser::BinOpNode>(node->right);
 			if (right_binop->operation == lexer::MUL || right_binop->operation == lexer::DIV) {
 				// Temporarily store the result of the left side
-				push("rax");
+				push("rax", ktypes::INT64);
 				visit_binop(right_binop, "rax");  // Evaluate the right child expression first
 				pop("rbx"); // Restore the left-hand side
 			}
@@ -469,7 +469,9 @@ int compiler::Compiler::get_variable_offset(std::string varname) {
 	return (stacksize - 8 - varlocs[varname]);
 }
 
-void compiler::Compiler::push(std::string reg) {
+void compiler::Compiler::push(std::string reg, ktypes::ktype_t type) {
+	if (reg != txbreg(reg, type))
+		textSection.push_back("movzx " + reg + ", " + txbreg(reg, type));
 	textSection.push_back("push " + reg);
 	stacksize += 8;
 }

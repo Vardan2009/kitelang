@@ -2,19 +2,14 @@ global _start
 
 % TYPES!!!!
 fn _start() : byte {
-    let alphabet : char[52] % 2(26 letters in the alphabet)
-    let counter : int32 = 0
-
-    % i in for loops is automatically int64
-    for i = 0 -> 26 - 1 ^ 1 {
-        alphabet[counter] = 65 + i
-        counter = counter + 1
-        alphabet[counter] = 97 + i
-        counter = counter + 1
-    }
-
-    print(alphabet)
-	return 0
+    print("Hello world! What is your name: ")
+    let buffer : char[512]
+    readln(buffer, 512)
+    printc('\n')
+    print("Hello, ")
+    print(buffer)
+    printc('!')
+    return 0
 }
 
 ~
@@ -148,7 +143,7 @@ returns:
     the ASCII character value of the inputted character
 ~
 fn readc() : char {
-    @stackszinc 1                     % increase stack size (used for the compiler)
+    @stackszinc 8                     % increase stack size (used for the compiler)
     asm "sub rsp, 8"                  % allocate space on the stack
     asm "mov rdi, rsp"                % set RDI to point to the stack space
     asm "mov rax, 0"                  % syscall id for read
@@ -177,4 +172,27 @@ fn iseq(a : int64, b : int64) : bool {
         }
     }
     return 0
+}
+
+~
+readln function
+args:
+   the buffer (char array)
+   the length of the buffer (integer)
+usage example:
+    reads(buffer, 512) % reads a line from stdin to buffer (max 512 bytes)
+returns:
+    none
+~
+fn readln(buffer : ptr, buflen : int64) : void {
+    let c       : char = 0
+    buffer[buflen - 1] = 0
+    for i = 0 -> buflen - 2 ^ 1 {
+        c = readc()
+        buffer[i] = c
+        if c == 10 {
+            buffer[i] = 0
+            break
+        }
+    }
 }

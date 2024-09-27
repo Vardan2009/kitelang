@@ -114,7 +114,7 @@ namespace compiler {
 		std::map<std::string, ktypes::ktype_t> vartypes {};
 		std::map<std::string, ktypes::kfndec_t> fns {};
 		int stacksize = 0;
-		void push(std::string);
+		void push(std::string, ktypes::ktype_t);
 		void pop(std::string);
 		void pop();
 	public:
