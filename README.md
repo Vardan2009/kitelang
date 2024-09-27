@@ -7,9 +7,9 @@ This repository contains a simple compiler for it written in C++ that generates 
 - Hello World!
 ```
 global _start
-extern print
+extern print(ptr)
 
-fn _start() {
+fn _start() : byte {
   print("Hello, World!")
   return 0
 }
@@ -18,14 +18,14 @@ fn _start() {
 ```
 global _start
 extern {
-  print,
-  printi,
-  printc
+  print(ptr),
+  printi(int64),
+  printc(ptr)
 }
 
-fn _start() {
-  let x = 9
-  let y = 10
+fn _start() : byte {
+  let x : byte = 9
+  let y : byte = 10
 
   print("x: ")
   printi(x)
@@ -45,13 +45,14 @@ fn _start() {
 - Functions
 ```
 global _start
-extern printi
+extern printi(int64)
 
-fn _start() {
+fn _start() : byte {
   printi(factor(10, 5))
+  return 0
 }
 
-fn factor(a, b) {
+fn factor(a : int64, b : int64) : int64 {
   return a * b
 }
 ```
@@ -59,25 +60,25 @@ fn factor(a, b) {
 ```
 global _start
 extern {
-  print,
-  printi,
-  printc
+  print(ptr),
+  printi(int64),
+  printc(ptr)
 }
 
-fn _start() {
-  let value = 20
-  let ptr = &value
+fn _start() : byte {
+  let value : byte = 20
+  let vptr : ptr = &value
 
   print("The Value: ")
   printi(value)
   printc('\n')
 
   print("The Address: ")
-  printi(ptr)
+  printi(vptr)
   printc('\n')
 
   print("Dereferenced Pointer Value: ")
-  printi(*ptr)
+  printi(*vptr)
   printc('\n')
   return 0
 }

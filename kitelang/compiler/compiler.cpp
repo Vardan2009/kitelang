@@ -1,7 +1,29 @@
 #include "compiler.h"
 
 void compiler::Compiler::codegen() {
+	for (std::shared_ptr<parser::Node> n : root->statements) {
+		if (n->type == parser::FN) {
+			std::shared_ptr<parser::FnNode> node = std::static_pointer_cast<parser::FnNode>(n);
+			std::vector<ktypes::ktype_t> types;
+			for (int i = 0; i < node->args.size(); i++)
+				types.push_back(node->args[i].type);
+			fns[node->name] = kfndec_t{ types, node->returns };
+		}
+	}
 	visit_root(root);
+}
+
+std::string compiler::Compiler::txbreg(std::string reg, ktypes::ktype_t type) {
+	switch(ktypes::size(type)) {
+	case 1:
+		return b8r[reg];
+	case 2:
+		return b16r[reg];
+	case 4:
+		return b32r[reg];
+	case 8:
+		return reg;
+	}
 }
 
 void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::string reg) {
@@ -41,25 +63,24 @@ void compiler::Compiler::visit_root(std::shared_ptr<parser::RootNode> node) {
 }
 
 void compiler::Compiler::visit_root_with_scope(std::shared_ptr<parser::RootNode> node) {
-	std::map<std::string, int> oldvars(vars);
+	std::map<std::string, int> oldvars(varlocs);
 	int oldStackSize = stacksize;
 	for (std::shared_ptr<parser::Node> n : node->statements) {
 		visit_node(n);
 	}
-	for (int i = stacksize; i > oldStackSize; i--) {
-		pop();
-	}
-	vars = oldvars;
+	textSection.push_back("add rsp, " + std::to_string(stacksize - oldStackSize));
+	stacksize = oldStackSize;
+	varlocs = oldvars;
 }
 
 int compiler::Compiler::visit_root_with_scope_return_amt(std::shared_ptr<parser::RootNode> node) {
-	std::map<std::string, int> oldvars(vars);
+	std::map<std::string, int> oldvars(varlocs);
 	int oldStackSize = stacksize;
 	for (std::shared_ptr<parser::Node> n : node->statements) {
 		visit_node(n);
 	}
-	vars = oldvars;
-	return (stacksize - oldStackSize) * 8;
+	varlocs = oldvars;
+	return (stacksize - oldStackSize);
 }
 
 void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node, std::string reg) {
@@ -78,26 +99,26 @@ void compiler::Compiler::visit_reg(std::shared_ptr<parser::RegNode> node, std::s
 }
 
 void compiler::Compiler::visit_addrof(std::shared_ptr<parser::AddrOfNode> node, std::string reg) {
-	if (vars.find(node->name) == vars.end())
+	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	textSection.push_back("lea " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
 
 void compiler::Compiler::visit_deref(std::shared_ptr<parser::DerefNode> node, std::string reg) {
-	if (vars.find(node->name) == vars.end())
+	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 	textSection.push_back("mov " + reg + ", [" + reg + "]");
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
-	if (vars.find(node->name) == vars.end())
+	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
 
 void compiler::Compiler::visit_idx(std::shared_ptr<parser::IndexNode> node, std::string reg) {
-	if (vars.find(node->name) == vars.end())
+	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	visit_node(node->index, "rbx");
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
@@ -140,17 +161,21 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 	// for (int i = node->args.size(); i < 6; i++) {
 	//	 textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
 	// }
+
+	if (fns[node->routine].argtps.size() != node->args.size())
+		throw std::runtime_error("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()));
+
 	for (int i = 0; i < node->args.size(); i++) {
-		visit_node(node->args[i], "rax");
+		visit_node(node->args[i], txbreg("rax", fns[node->routine].argtps[i]));
 		push("rax");
 	}
-	for (int i = 0; i < node->args.size(); i++) {
+
+	for (int i = 0; i < node->args.size(); i++)
 		pop(argregs[i]);
-	}
+
 	textSection.push_back("call " + node->routine);
 
-	if (reg != "rax" && reg != "")
-		textSection.push_back("mov " + reg + ", rax");
+	if (reg != "rax" && reg != "") textSection.push_back("mov " + reg + ", rax");
 }
 
 void compiler::Compiler::visit_extern(std::shared_ptr<parser::ExternNode> node) {
@@ -164,7 +189,8 @@ void compiler::Compiler::visit_global(std::shared_ptr<parser::GlobalNode> node) 
 }
 
 void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) {
-	visit_node(node->value, "rax");
+	if(fns[curFn].returns != ktypes::VOID)
+		visit_node(node->value, txbreg("rax", fns[curFn].returns));
 	textSection.push_back("jmp " + curFn + "_end");
 }
 
@@ -186,20 +212,19 @@ void compiler::Compiler::visit_continue() {
 void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	curFn = node->name;
 	textSection.push_back(node->name + ":");
-	std::map<std::string, int> oldvars(vars);
-	for (int i = 0; i < node->argnames.size(); i++) {
-		vars[node->argnames[i]] = stacksize;
+	std::map<std::string, int> oldvars(varlocs);
+	for (int i = 0; i < node->args.size(); i++) {
+		varlocs[node->args[i].name] = stacksize;
 		push(argregs[i]);
 	}
 	int amtToClear = visit_root_with_scope_return_amt(node->root);
 	textSection.push_back(node->name + "_end:");
 	textSection.push_back("add rsp, " + std::to_string(amtToClear));
 	stacksize -= amtToClear;
-	for (int i = 0; i < node->argnames.size(); i++) {
+	for (int i = 0; i < node->args.size(); i++)
 		pop();
-	}
 	curFn = "";
-	vars = oldvars;
+	varlocs = oldvars;
 	// _start is the entry point
 	if (node->name == "_start") {
 		// for exiting with the return value of _start
@@ -264,11 +289,11 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	int id = cmpLabelCount++;
 	curLoop = node;
 	curLoopId = id;
-	std::map<std::string, int> oldvars(vars);
+	std::map<std::string, int> oldvars(varlocs);
 
 	visit_node(node->initVal, "rax");
 	int oldStackSize = stacksize;
-	vars[node->itername] = stacksize;
+	varlocs[node->itername] = stacksize;
 	push("rax");
 
 	textSection.push_back("loop_" + std::to_string(id) + ":");
@@ -282,22 +307,28 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	textSection.push_back("jg loop_end_" + std::to_string(id));
 	textSection.push_back("jmp loop_" + std::to_string(id));
 	textSection.push_back("loop_end_" + std::to_string(id) + ": ");
-	for (int i = stacksize; i > oldStackSize; i--) {
-		pop();
-	}
-	vars = oldvars;
+	textSection.push_back("add rsp, " + std::to_string(stacksize - oldStackSize));
+	stacksize = oldStackSize;
+	varlocs = oldvars;
 }
 
 void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 	if (node->isAlloc) {
-		textSection.push_back("sub rsp, " + std::to_string(node->allocVal));
-		stacksize += node->allocVal / 8;
-		vars[node->name] = stacksize;
+		int allocationSize = node->allocVal * ktypes::size(node->varType);
+
+		if (allocationSize > 0) {
+			int totalAllocation = (allocationSize + 15) & ~15; // Align to 16 bytes
+			textSection.push_back("sub rsp, " + std::to_string(totalAllocation));
+			stacksize += totalAllocation;
+		}
+		varlocs[node->name] = stacksize;
+		vartypes[node->name] = node->varType;
 		push("rsp");
 	}
 	else {
-		visit_node(node->root, "rax");
-		vars[node->name] = stacksize;
+		visit_node(node->root, txbreg("rax", node->varType));
+		vartypes[node->name] = node->varType;
+		varlocs[node->name] = stacksize;
 		push("rax");
 	}
 }
@@ -407,16 +438,19 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 	else if (node->operation == lexer::EQ) { // Assignment
 		visit_node(node->right, "rax"); // store the new value in rax
 		if (node->left->type == parser::VAR) // regular variable (x)
-			textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], rax"); // move the result from rax to the stack
+			textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], " + txbreg("rax", vartypes[std::static_pointer_cast<parser::VarNode>(node->left)->name])); // move the result from rax to the stack
 		else if (node->left->type == parser::DEREF) { // variable dereference pointer (*x)
+			if (vartypes[std::static_pointer_cast<parser::DerefNode>(node->left)->name] != ktypes::PTR)
+				throw std::runtime_error("cannot dereference a non-pointer");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::DerefNode>(node->left)->name)) +"]");
 			textSection.push_back("mov [rbx], rax");
 		}
 		else if (node->left->type == parser::IDX) {  // index access pointer (x[i])
+			ktypes::ktype_t type = vartypes[std::static_pointer_cast<parser::IndexNode>(node->left)->name];
 			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
 			visit_node(n->index, "rcx");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
-			textSection.push_back("imul rcx, rcx, 8");
+			textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
 			textSection.push_back("add rbx, rcx");
 			textSection.push_back("mov [rbx], rax");
 		}
@@ -430,20 +464,20 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 
 
 int compiler::Compiler::get_variable_offset(std::string varname) {
-	return (stacksize - 1 - vars[varname]) * 8;
+	return (stacksize - 8 - varlocs[varname]);
 }
 
 void compiler::Compiler::push(std::string reg) {
 	textSection.push_back("push " + reg);
-	stacksize++;
+	stacksize += 8;
 }
 
 void compiler::Compiler::pop(std::string reg) {
 	textSection.push_back("pop " + reg);
-	stacksize--;
+	stacksize -= 8;
 }
 
 void compiler::Compiler::pop() {
 	textSection.push_back("add rsp, 8");
-	stacksize--;
+	stacksize -= 8;
 }

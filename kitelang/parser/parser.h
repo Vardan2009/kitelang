@@ -1,5 +1,6 @@
 #pragma once
 #include "node.h"
+#include "../common.h"
 
 namespace parser {
 	class Parser {
@@ -24,6 +25,8 @@ namespace parser {
 		std::shared_ptr<ForNode> for_node();
 		std::shared_ptr<LoopNode> loop_node();
 		std::shared_ptr<LetNode> let_node();
+
+		ktypes::ktype_t type();
 
 		std::shared_ptr<lexer::Token> peek();
 		std::shared_ptr<lexer::Token> advance();

@@ -1,30 +1,20 @@
 global _start
 
-% ARRAYS!!!!
-fn _start() {
-    let x[3]
-    x[0] = 10
-    x[1] = 20
-    x[2] = 30
-    for i = 0 to 2 step 1 {
-        printi(x[i])
-        printc('\n')
-    }
-	return 0
-}
+% TYPES!!!!
+fn _start() : int {
+    let alphabet : char[52] % 26 letters in the alphabet * 2
+    let counter : int32 = 0
 
-fn nfib(n) {
-    let a = 0
-    let b = 1
-    let c = 0
-    let i = 0
-    if n == 0 return a
-    for i = 2 to n step 1 {
-        c = a + b
-        a = b
-        b = c
+    % i in for loops is automatically int64
+    for i = 0 -> 26 - 1 ^ 1 {
+        alphabet[counter] = 65 + i
+        counter = counter + 1
+        alphabet[counter] = 97 + i
+        counter = counter + 1
     }
-    return b
+
+    print(alphabet)
+	return 0
 }
 
 ~
@@ -42,7 +32,7 @@ usage example:
 returns:
     none
 ~
-fn printc() {
+fn printc(c : ptr) : void {
     asm "mov rdx, 1"                % set the number of bytes to write (1)
     asm "mov rsi, rdi"              % move the character to RSI (pointer to the character)
     asm "mov rax, 1"                % syscall id for write
@@ -59,7 +49,7 @@ usage example:
 returns:
     none
 ~
-fn print() {
+fn print(str : ptr) : void {
     asm "push rdi"                      % preserve the pointer to the string on the stack
     asm "mov rax, 1"                    % RAX - syscall id for write
     asm "mov rdi, 1"                    % RDI - file descriptor (STDOUT)
@@ -88,7 +78,7 @@ usage example:
 returns:
     a character pointer with given ASCII value
 ~
-fn itoc() {
+fn itoc(int : byte) : ptr {
     asm "sub rsp, 8"                  % allocate space on the stack
     asm "mov byte [rsp], dil"         % store the ASCII character in the stack
     asm "lea rax, [rsp]"              % load the address of the character into RAX
@@ -104,7 +94,7 @@ usage example:
 returns:
     none
 ~
-fn printascii() {
+fn printascii(int : byte) : void {
     asm "push rdi"                    % preserve the original RDI value
     asm "mov rax, 1"                  % syscall id for write
     asm "mov rdi, 1"                  % file descriptor (STDOUT)
@@ -123,7 +113,7 @@ usage example:
 returns:
     none
 ~
-fn printi() {
+fn printi(int : int64) : void {
     asm "mov rbp, 0"                  % initialize a counter for digits
     asm ".convert_loop:"               % start of the conversion loop
     asm "mov rax, rdi"                 % move the integer to RAX for division
@@ -155,9 +145,9 @@ args:
 usage example:
     readc() % first character in stdin
 returns:
-    the ASCII integer of the inputted character
+    the ASCII character value of the inputted character
 ~
-fn readc() {
+fn readc() : char {
     @stackszinc 1                     % increase stack size (used for the compiler)
     asm "sub rsp, 8"                  % allocate space on the stack
     asm "mov rdi, rsp"                % set RDI to point to the stack space
@@ -180,8 +170,8 @@ returns:
     1 if the values are equal,
     0 if not
 ~
-fn iseq(a, b) {
-    cmp ^rdi, ^rsi {
+fn iseq(a : int64, b : int64) : bool {
+    cmp a, b {
         eq {
             return 1
         }

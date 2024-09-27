@@ -167,18 +167,23 @@ std::shared_ptr<parser::ReturnNode> parser::Parser::return_node() {
 std::shared_ptr<parser::FnNode> parser::Parser::fn_node() {
 	consume(lexer::KEYWORD, "fn");
 	std::string name = advance()->value_str;
-	std::vector <std::string> argnames {};
+	std::vector <ktypes::kval_t> args {};
 	consume(lexer::LPAREN);
 	while (peek()->type != lexer::RPAREN) {
 		if (peek()->type != lexer::IDENTIFIER)
 			throw std::runtime_error("expected an identifier");
-		argnames.push_back(advance()->value_str);
+		std::string argnm = advance()->value_str;
+		consume(lexer::COLON);
+		ktypes::ktype_t argtp = type();
+		args.push_back(ktypes::kval_t{argnm, argtp});
 		if (peek()->type == lexer::RPAREN) break;
 		consume(lexer::COMMA);
 	}
 	consume(lexer::RPAREN);
+	consume(lexer::COLON);
+	ktypes::ktype_t returns = type();
 	std::shared_ptr<RootNode> root = statement_list();
-	return std::make_shared<FnNode>(name, argnames, root);
+	return std::make_shared<FnNode>(name, args, returns, root);
 }
 
 std::shared_ptr<parser::IfNode> parser::Parser::if_node() {
@@ -231,20 +236,28 @@ std::shared_ptr<parser::ForNode> parser::Parser::for_node() {
 std::shared_ptr<parser::LetNode> parser::Parser::let_node() {
 	consume(lexer::KEYWORD, "let");
 	std::string name = advance()->value_str;
+	consume(lexer::COLON);
+	ktypes::ktype_t tp = type();
 	if (peek()->type == lexer::EQ) {
 		consume(lexer::EQ);
 		std::shared_ptr<Node> root = expr();
-		return std::make_shared<LetNode>(name, root);
+		return std::make_shared<LetNode>(name, tp, root);
 	}
 	else if (peek()->type == lexer::LSQR) {
 		consume(lexer::LSQR);
 		if (peek()->type != lexer::INT_LIT)
 			throw std::runtime_error("allocation size should be an integer literal");
-		int allocVal = 8 * advance()->value;
+		int allocVal = advance()->value;
 		consume(lexer::RSQR);
-		return std::make_shared<LetNode>(name, allocVal);
+		return std::make_shared<LetNode>(name, tp, allocVal);
 	}
 	else throw std::runtime_error("expected [ or = after let");
+}
+
+ktypes::ktype_t parser::Parser::type() {
+	if (peek()->type != lexer::KEYWORD || !ktypes::nktype_t.contains(peek()->value_str))
+		throw std::runtime_error("expected type specifier");
+	return ktypes::from_string(advance()->value_str);
 }
 
 std::shared_ptr<lexer::Token> parser::Parser::peek() {

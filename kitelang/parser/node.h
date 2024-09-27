@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 
+#include "../common.h"
 #include "../lexer/token.h"
 
 namespace parser {
@@ -169,9 +170,10 @@ namespace parser {
 	public:
 		std::string name;
 		std::shared_ptr<RootNode> root;
-		std::vector<std::string> argnames;
-		FnNode(std::string rout, std::vector<std::string> argnms, std::shared_ptr<RootNode> rt)
-			: name(rout), root(rt), argnames(argnms) {
+		std::vector<ktypes::kval_t> args;
+		ktypes::ktype_t returns;
+		FnNode(std::string rout, std::vector<ktypes::kval_t> args, ktypes::ktype_t returns, std::shared_ptr<RootNode> rt)
+			: name(rout), root(rt), args(args), returns(returns) {
 			type = FN;
 		}
 		void print(int indent = 0) const {
@@ -219,12 +221,13 @@ namespace parser {
 		std::shared_ptr<Node> root;
 		bool isAlloc = false;
 		int allocVal = -1;
-		LetNode(std::string rout, std::shared_ptr<Node> rt)
-			: name(rout), root(rt) {
+		ktypes::ktype_t varType;
+		LetNode(std::string rout, ktypes::ktype_t varType, std::shared_ptr<Node> rt)
+			: name(rout), root(rt), varType(varType) {
 			type = LET;
 		}
-		LetNode(std::string rout, int allocVal)
-			: name(rout), allocVal(allocVal), isAlloc(true){
+		LetNode(std::string rout, ktypes::ktype_t varType, int allocVal)
+			: name(rout), allocVal(allocVal), isAlloc(true), varType(varType) {
 			type = LET;
 		}
 		void print(int indent = 0) const {

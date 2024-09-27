@@ -7,8 +7,68 @@
 #include "../parser/parser.h"
 
 namespace compiler {
+	typedef struct {
+		std::vector<ktypes::ktype_t> argtps;
+		ktypes::ktype_t returns;
+	} kfndec_t;
+
 	class Compiler {
 	private:
+		std::map<std::string, std::string> b32r{
+			{"rax", "eax"},
+			{"rcx", "ecx"},
+			{"rdx", "edx"},
+			{"rbx", "ebx"},
+			{"rsi", "esi"},
+			{"rdi", "edi"},
+			{"rsp", "esp"},
+			{"rbp", "ebp"},
+			{"r8", "r8d"},
+			{"r9", "r9d"},
+			{"r10", "r10d"},
+			{"r11", "r11d"},
+			{"r12", "r12d"},
+			{"r13", "r13d"},
+			{"r14", "r14d"},
+			{"r15", "r15d"},
+		};
+		std::map<std::string, std::string> b16r{
+			{"rax", "ax"},
+			{"rcx", "cx"},
+			{"rdx", "dx"},
+			{"rbx", "bx"},
+			{"rsi", "si"},
+			{"rdi", "di"},
+			{"rsp", "sp"},
+			{"rbp", "bp"},
+			{"r8", "r8w"},
+			{"r9", "r9w"},
+			{"r10", "r10w"},
+			{"r11", "r11w"},
+			{"r12", "r12w"},
+			{"r13", "r13w"},
+			{"r14", "r14w"},
+			{"r15", "r15w"},
+		};
+		std::map<std::string, std::string> b8r{
+			{"rax", "al"},
+			{"rcx", "cl"},
+			{"rdx", "dl"},
+			{"rbx", "bl"},
+			{"rsi", "sil"},
+			{"rdi", "dil"},
+			{"rsp", "spl"},
+			{"rbp", "bpl"},
+			{"r8", "r8b"},
+			{"r9", "r9b"},
+			{"r10", "r10b"},
+			{"r11", "r11b"},
+			{"r12", "r12b"},
+			{"r13", "r13b"},
+			{"r14", "r14b"},
+			{"r15", "r15b"},
+		};
+		std::string txbreg(std::string, ktypes::ktype_t);
 		std::string argregs[6] = { "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
 		std::map<std::string, std::string> cmpkeywordinstruction = {
 			{"eq", "je"},
@@ -54,7 +114,9 @@ namespace compiler {
 
 		int get_variable_offset(std::string);
 
-		std::map<std::string, int> vars {};
+		std::map<std::string, int> varlocs{};
+		std::map<std::string, ktypes::ktype_t> vartypes {};
+		std::map<std::string, kfndec_t> fns {};
 		int stacksize = 0;
 		void push(std::string);
 		void pop(std::string);
