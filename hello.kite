@@ -27,7 +27,7 @@ usage example:
 returns:
     none
 ~
-fn printc(c : ptr) : void {
+fn printc(c : ptr64) : void {
     asm "mov rdx, 1"                % set the number of bytes to write (1)
     asm "mov rsi, rdi"              % move the character to RSI (pointer to the character)
     asm "mov rax, 1"                % syscall id for write
@@ -44,7 +44,7 @@ usage example:
 returns:
     none
 ~
-fn print(str : ptr) : void {
+fn print(str : ptr64) : void {
     asm "push rdi"                      % preserve the pointer to the string on the stack
     asm "mov rax, 1"                    % RAX - syscall id for write
     asm "mov rdi, 1"                    % RDI - file descriptor (STDOUT)
@@ -73,7 +73,7 @@ usage example:
 returns:
     a character pointer with given ASCII value
 ~
-fn itoc(int : byte) : ptr {
+fn itoc(int : byte) : ptr64 {
     asm "sub rsp, 8"                  % allocate space on the stack
     asm "mov byte [rsp], dil"         % store the ASCII character in the stack
     asm "lea rax, [rsp]"              % load the address of the character into RAX
@@ -184,7 +184,7 @@ usage example:
 returns:
     none
 ~
-fn readln(buffer : ptr, buflen : int64) : void {
+fn readln(buffer : ptr8, buflen : int64) : void {
     let c       : char = 0
     buffer[buflen - 1] = 0
     for i = 0 -> buflen - 2 ^ 1 {

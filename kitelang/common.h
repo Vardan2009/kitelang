@@ -10,9 +10,13 @@ namespace ktypes {
 		CHAR,
 		BYTE,
 		BOOL,
+		INT16,
 		INT32,
 		INT64,
-		PTR
+		PTR8,
+		PTR16,
+		PTR32,
+		PTR64,
 	} ktype_t;
 
 	typedef struct {

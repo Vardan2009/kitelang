@@ -217,6 +217,7 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	std::map<std::string, int> oldvars(varlocs);
 	for (int i = 0; i < node->args.size(); i++) {
 		varlocs[node->args[i].name] = stacksize;
+		vartypes[node->args[i].name] = node->args[i].type;
 		push(argregs[i], node->args[i].type);
 	}
 	int amtToClear = visit_root_with_scope_return_amt(node->root);
@@ -442,7 +443,13 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 		if (node->left->type == parser::VAR) // regular variable (x)
 			textSection.push_back("mov [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::VarNode>(node->left)->name)) + "], " + txbreg("rax", vartypes[std::static_pointer_cast<parser::VarNode>(node->left)->name])); // move the result from rax to the stack
 		else if (node->left->type == parser::DEREF) { // variable dereference pointer (*x)
-			if (vartypes[std::static_pointer_cast<parser::DerefNode>(node->left)->name] != ktypes::PTR)
+			ktypes::ktype_t type = vartypes[std::static_pointer_cast<parser::DerefNode>(node->left)->name];
+			if (
+				type != ktypes::PTR8  &&
+				type != ktypes::PTR16 &&
+				type != ktypes::PTR32 &&
+				type != ktypes::PTR64
+				)
 				throw std::runtime_error("cannot dereference a non-pointer");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::DerefNode>(node->left)->name)) +"]");
 			textSection.push_back("mov [rbx], rax");
@@ -452,7 +459,31 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
 			visit_node(n->index, "rcx");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
-			// textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
+			if (
+				type == ktypes::PTR8  ||
+				type == ktypes::PTR16 ||
+				type == ktypes::PTR32 ||
+				type == ktypes::PTR64
+				) {
+				int size = 0;
+				switch (type) {
+				case ktypes::PTR8:
+					size = 1;
+					break;
+				case ktypes::PTR16:
+					size = 2;
+					break;
+				case ktypes::PTR32:
+					size = 4;
+					break;
+				case ktypes::PTR64:
+					size = 8;
+					break;
+				}
+				textSection.push_back("imul rcx, rcx, " + std::to_string(size));
+			}
+			else
+				textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
 			textSection.push_back("add rbx, rcx");
 			textSection.push_back("mov [rbx], rax");
 		}

@@ -53,7 +53,7 @@ namespace lexer {
 		// this is to determine if the "word" is a keyword or a reference to a variable or function (identifier)
 		std::set<std::string> keywords = {
 			"extern", "global", "fn", "let", "for", "cmp", "asm", "eq", "neq", "return", "break", "continue", "loop", "if",
-			"void", "char", "byte", "bool", "int32", "int64", "ptr"
+			"void", "char", "byte", "bool", "int16","int32", "int64", "ptr8", "ptr16", "ptr32", "ptr64"
 		};
 		std::string src;
 		// the pointer to the current character
