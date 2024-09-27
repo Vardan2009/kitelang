@@ -452,7 +452,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
 			visit_node(n->index, "rcx");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
-			textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
+			// textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
 			textSection.push_back("add rbx, rcx");
 			textSection.push_back("mov [rbx], rax");
 		}

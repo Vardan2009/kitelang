@@ -3,11 +3,11 @@ global _start
 % TYPES!!!!
 fn _start() : byte {
     print("Hello world! What is your name: ")
-    let buffer : char[512]
-    readln(buffer, 512)
+    let name : char[512]
+    readln(name, 512)
     printc('\n')
     print("Hello, ")
-    print(buffer)
+    print(name)
     printc('!')
     return 0
 }
