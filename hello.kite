@@ -2,8 +2,11 @@ global _start
 
 ; TYPES!!!!
 fn _start() : byte {
-    for y = 0 -> 7 ^ 1 {
-        for x = 0 -> 7 ^ 1 printi((x % 2) == (y % 2))
+    let xstr : char[512]
+    readln(xstr, 512)
+    let w : int64 = stoi(xstr)
+    for y = 0 -> w - 1 ^ 1 {
+        for x = 0 -> w - 1 ^ 1 printi((x % 2) == (y % 2))
         printc('\n')
     }
     return 0
@@ -212,12 +215,9 @@ returns:
     number converted to integer
 ~
 fn stoi(str : ptr8) : int64 {
-    ; str = 123
-    ; len = 3
     let len  : int64 = strlen(str)
     let chidx : int64 = 0
     let curl  : byte  = 0
-    ; base10 = 100
     let base10 : int64 = pow(10, len - 1)
     let result : int64 = 0
 
@@ -245,6 +245,7 @@ returns:
 fn pow(base : int64, exp : int64) : int64 {
     if exp < 0 return 0
     let result : int64 = 1
+    if exp == 0 return 1
     for i = 0 -> exp - 1 ^ 1 {
         result = result * base
     }
