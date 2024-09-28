@@ -62,7 +62,7 @@ std::shared_ptr<parser::Node> parser::Parser::expr() {
 
 std::shared_ptr<parser::Node> parser::Parser::term() {
 	std::shared_ptr<Node> n = factor();
-	while (peek()->type == lexer::MUL || peek()->type == lexer::DIV) {
+	while (peek()->type == lexer::MUL || peek()->type == lexer::DIV || peek()->type == lexer::MOD) {
 		std::shared_ptr<lexer::Token> op = advance();
 		std::shared_ptr<Node> r = factor();
 		n = std::make_shared<BinOpNode>(n, op->type, r);

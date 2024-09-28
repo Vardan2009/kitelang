@@ -30,7 +30,7 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		else if (specials.count(src[ptr]))
 			result.push_back(make_special());
 		// if it is a single line comment prefix, skip the comment
-		else if (src[ptr] == '%') skip_comment();
+		else if (src[ptr] == ';') skip_comment();
 		// if it is a multiline comment prefix, skip the comment
 		else if (src[ptr] == '~') skip_multiline_comment();
 		// ignore whitespace

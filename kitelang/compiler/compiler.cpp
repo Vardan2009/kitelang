@@ -431,10 +431,12 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			textSection.push_back("sub rax, rbx");
 		}
 	}
-	else if (node->operation == lexer::MUL || node->operation == lexer::DIV) {
+	else if (node->operation == lexer::MUL || node->operation == lexer::DIV || node->operation == lexer::MOD) {
 		// Multiplication or division always has precedence
 		visit_node(node->left, "rax");
+		push("rax", ktypes::INT64);
 		visit_node(node->right, "rbx");
+		pop("rax");
 
 		if (node->operation == lexer::MUL) {
 			textSection.push_back("imul rax, rbx");
@@ -443,6 +445,11 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			textSection.push_back("xor rdx, rdx");  // Clear rdx for division
 			textSection.push_back("idiv rbx");
 		}
+		else if (node->operation == lexer::MOD) {
+			textSection.push_back("xor rdx, rdx");
+			textSection.push_back("idiv rbx");     
+			textSection.push_back("mov rax, rdx");
+		}
 	}
 	// Handle comparison operators
 	else if (node->operation == lexer::EQEQ || node->operation == lexer::NEQEQ ||
@@ -450,7 +457,9 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 		node->operation == lexer::GTE || node->operation == lexer::LTE) {
 
 		visit_node(node->left, "rax");
+		push("rax", ktypes::INT64);
 		visit_node(node->right, "rbx");
+		pop("rax");
 
 		int id = cmpLabelCount++;
 		std::string label_true = "boolop_true_" + std::to_string(id);
@@ -543,7 +552,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 
 	// Store the result in the appropriate register
 	if (node->operation != lexer::EQ)
-		textSection.push_back("mov " + reg + ", rax");
+		textSection.push_back("mov " + b64r[reg] + ", rax");
 }
 
 

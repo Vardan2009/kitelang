@@ -33,7 +33,8 @@ namespace lexer {
 		RSQR,
 		COLON,
 		CARET,
-		ARROW
+		ARROW,
+		MOD
 	} token_t;
 
 	// Token class
