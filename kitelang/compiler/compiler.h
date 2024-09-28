@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include "../parser/parser.h"
+#include "../semantics/semantics.h"
 
 namespace compiler {
 

@@ -6,6 +6,7 @@
 
 namespace ktypes {
 	typedef enum {
+		ANY,     // used for semantic analysis when it cant determine what will the resulting type be
 		VOID,
 		CHAR,
 		BYTE,
@@ -31,6 +32,7 @@ namespace ktypes {
 	} kfndec_t;
 
 	extern std::map<std::string, ktype_t> nktype_t;
+	extern std::map<ktypes::ktype_t, std::string> ktype_tn;
 	extern std::map<ktype_t, int> bsktype_t;
 	extern ktype_t from_string(std::string);
 	extern int size(ktype_t);

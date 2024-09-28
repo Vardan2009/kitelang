@@ -1,28 +1,42 @@
 #include "common.h"
 
 std::map<std::string, ktypes::ktype_t> ktypes::nktype_t {
-	{"void", VOID},
-	{"char", CHAR},
-	{"byte", BYTE},
-	{"bool", BOOL},
+	{"void",  VOID},
+	{"char",  CHAR},
+	{"byte",  BYTE},
+	{"bool",  BOOL},
 	{"int16", INT16},
 	{"int32", INT32},
 	{"int64", INT64},
-	{"ptr8", PTR8},
+	{"ptr8",  PTR8},
 	{"ptr16", PTR16},
 	{"ptr32", PTR32},
 	{"ptr64", PTR64},
 };
 
+std::map<ktypes::ktype_t, std::string> ktypes::ktype_tn = {
+	{VOID, "void"},
+	{CHAR, "char"},
+	{BYTE, "byte"},
+	{BOOL, "bool"},
+	{INT16, "int16"},
+	{INT32, "int32"},
+	{INT64, "int64"},
+	{PTR8, "ptr8"},
+	{PTR16, "ptr16"},
+	{PTR32, "ptr32"},
+	{PTR64, "ptr64"}
+};
+
 std::map<ktypes::ktype_t, int> ktypes::bsktype_t{
-	{VOID, 0},
-	{CHAR, 1},
-	{BYTE, 1},
-	{BOOL, 1},
+	{VOID,  0},
+	{CHAR,  1},
+	{BYTE,  1},
+	{BOOL,  1},
 	{INT16, 2},
 	{INT32, 4},
 	{INT64, 8},
-	{PTR8, 8},
+	{PTR8,  8},
 	{PTR16, 8},
 	{PTR32, 8},
 	{PTR64, 8},

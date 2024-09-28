@@ -88,9 +88,7 @@ void compiler::Compiler::visit_int_lit(std::shared_ptr<parser::IntLitNode> node,
 }
 
 void compiler::Compiler::visit_char_lit(std::shared_ptr<parser::CharLitNode> node, std::string reg) {
-	dataSection.push_back("datasec_" + std::to_string(dataSectionCount) + " db " + std::to_string(node->value));
-	textSection.push_back("mov " + reg + ", datasec_" + std::to_string(dataSectionCount));
-	++dataSectionCount;
+	textSection.push_back("mov " + reg + ", " + std::to_string(node->value));
 }
 
 void compiler::Compiler::visit_reg(std::shared_ptr<parser::RegNode> node, std::string reg) {
@@ -166,6 +164,11 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 		throw std::runtime_error("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()));
 
 	for (int i = 0; i < node->args.size(); i++) {
+		ktypes::ktype_t resultReturn = semantics::would_return(node->args[i], vartypes, fns);
+
+		if (!semantics::compatible(fns[node->routine].argtps[i], resultReturn))
+			throw std::runtime_error("argument " + std::to_string(i + 1) + ": cannot assign type " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " to " + ktypes::ktype_tn[resultReturn]);
+
 		visit_node(node->args[i], txbreg("rax", fns[node->routine].argtps[i]));
 		push("rax", fns[node->routine].argtps[i]);
 	}
@@ -325,10 +328,29 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 			stacksize += totalAllocation;
 		}
 		varlocs[node->name] = stacksize;
-		vartypes[node->name] = node->varType;
+		switch (ktypes::size(node->varType)) {
+		case 0:
+			throw std::runtime_error("cannot create array with void type");
+		case 1:
+			vartypes[node->name] = ktypes::PTR8;
+			break;
+		case 2:
+			vartypes[node->name] = ktypes::PTR16;
+			break;
+		case 4:
+			vartypes[node->name] = ktypes::PTR32;
+			break;
+		case 8:
+			vartypes[node->name] = ktypes::PTR64;
+			break;
+		}
 		push("rsp", ktypes::INT64);
 	}
 	else {
+		ktypes::ktype_t resultReturn = semantics::would_return(node->root, vartypes, fns);
+		if(!semantics::compatible(node->varType, resultReturn))
+			throw std::runtime_error("cannot assign type " + ktypes::ktype_tn[node->varType] + " to " + ktypes::ktype_tn[resultReturn]);
+
 		visit_node(node->root, txbreg("rax", node->varType));
 		vartypes[node->name] = node->varType;
 		varlocs[node->name] = stacksize;
