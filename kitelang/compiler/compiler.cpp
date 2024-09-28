@@ -26,6 +26,10 @@ std::string compiler::Compiler::txbreg(std::string reg, ktypes::ktype_t type) {
 	}
 }
 
+std::string compiler::Compiler::t64breg(std::string reg, ktypes::ktype_t type) {
+	return std::string();
+}
+
 void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::string reg) {
 	switch (node->type) {
 	case parser::EXTERN: return visit_extern(std::static_pointer_cast<parser::ExternNode>(node));
@@ -119,10 +123,35 @@ void compiler::Compiler::visit_idx(std::shared_ptr<parser::IndexNode> node, std:
 	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	visit_node(node->index, "rbx");
-	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
-	textSection.push_back("imul rbx, rbx, 8");
-	textSection.push_back("add " + reg + ", rbx");
-	textSection.push_back("mov " + reg + ", [" + reg + "]");
+	textSection.push_back("mov " + b64r[reg] + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
+	ktypes::ktype_t type = vartypes[node->name];
+	if (
+		type == ktypes::PTR8 ||
+		type == ktypes::PTR16 ||
+		type == ktypes::PTR32 ||
+		type == ktypes::PTR64
+		) {
+		int size = 0;
+		switch (type) {
+		case ktypes::PTR8:
+			size = 1;
+			break;
+		case ktypes::PTR16:
+			size = 2;
+			break;
+		case ktypes::PTR32:
+			size = 4;
+			break;
+		case ktypes::PTR64:
+			size = 8;
+			break;
+		}
+		textSection.push_back("imul rbx, rbx, " + std::to_string(size));
+	}
+	else
+		textSection.push_back("imul rbx, rbx, " + std::to_string(ktypes::size(type)));
+	textSection.push_back("add " + b64r[reg] + ", rbx");
+	textSection.push_back("mov " + b64r[reg] + ", [" + b64r[reg] + "]");
 }
 
 
@@ -477,10 +506,10 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			textSection.push_back("mov [rbx], rax");
 		}
 		else if (node->left->type == parser::IDX) {  // index access pointer (x[i])
-			ktypes::ktype_t type = vartypes[std::static_pointer_cast<parser::IndexNode>(node->left)->name];
 			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
 			visit_node(n->index, "rcx");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
+			ktypes::ktype_t type = vartypes[std::static_pointer_cast<parser::IndexNode>(node->left)->name];
 			if (
 				type == ktypes::PTR8  ||
 				type == ktypes::PTR16 ||

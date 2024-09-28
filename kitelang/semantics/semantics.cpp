@@ -20,7 +20,8 @@ ktypes::ktype_t semantics::call_would_return(std::shared_ptr<parser::CallNode> n
 }
 
 ktypes::ktype_t semantics::idx_would_return(std::shared_ptr<parser::IndexNode> node, std::map <std::string, ktypes::ktype_t> vartypes) {
-	return vartypes[node->name];
+	// return vartypes[node->name];
+	return ktypes::ANY;
 }
 
 ktypes::ktype_t semantics::var_would_return(std::shared_ptr<parser::VarNode> node, std::map <std::string, ktypes::ktype_t> vartypes) {
@@ -28,7 +29,7 @@ ktypes::ktype_t semantics::var_would_return(std::shared_ptr<parser::VarNode> nod
 }
 
 bool semantics::compatible(ktypes::ktype_t a, ktypes::ktype_t b) {
-	if ((a == ktypes::INT16 || a == ktypes::INT32 || a == ktypes::INT64) && (b == ktypes::INT16 || b == ktypes::INT32 || b == ktypes::INT64))
+	if ((a == ktypes::INT16 || a == ktypes::INT32 || a == ktypes::INT64 || a == ktypes::CHAR || a == ktypes::BYTE) && (b == ktypes::INT16 || b == ktypes::INT32 || b == ktypes::INT64 || b == ktypes::CHAR || b == ktypes::BYTE))
 		return true;
 	if (a == ktypes::ANY || b == ktypes::ANY) return true;
 	return a == b;

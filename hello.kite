@@ -2,13 +2,10 @@ global _start
 
 % TYPES!!!!
 fn _start() : byte {
-    print("Hello world! What is your name: ")
-    let name : char[512]
-    readln(name, 512)
-    printc('\n')
-    print("Hello, ")
-    print(name)
-    printc('!')
+    let buffer : char[512]
+    readln(buffer, 512)
+    print("Input Length: ")
+    printi(strlen(buffer))
     return 0
 }
 
@@ -162,4 +159,22 @@ fn readln(buffer : ptr8, buflen : int64) : void {
             break
         }
     }
+}
+
+~
+strlen function
+args:
+    the string (char array)
+usage example:
+    strlen("Hello") % 5
+returns:
+    the length of the string
+~
+fn strlen(str : ptr8) : int64 {
+    let result : int64 = 0
+    loop {
+        if str[result] == '\0' break
+        result = result + 1
+    }
+    return result
 }
