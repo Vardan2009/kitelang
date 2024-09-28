@@ -167,7 +167,7 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 		ktypes::ktype_t resultReturn = semantics::would_return(node->args[i], vartypes, fns);
 
 		if (!semantics::compatible(fns[node->routine].argtps[i], resultReturn))
-			throw std::runtime_error("argument " + std::to_string(i + 1) + ": cannot assign type " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " to " + ktypes::ktype_tn[resultReturn]);
+			throw std::runtime_error("function " + node->routine + ", argument " + std::to_string(i + 1) + ": incompatible types " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " and " + ktypes::ktype_tn[resultReturn]);
 
 		visit_node(node->args[i], txbreg("rax", fns[node->routine].argtps[i]));
 		push("rax", fns[node->routine].argtps[i]);
@@ -349,7 +349,7 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 	else {
 		ktypes::ktype_t resultReturn = semantics::would_return(node->root, vartypes, fns);
 		if(!semantics::compatible(node->varType, resultReturn))
-			throw std::runtime_error("cannot assign type " + ktypes::ktype_tn[node->varType] + " to " + ktypes::ktype_tn[resultReturn]);
+			throw std::runtime_error("incompatible types " + ktypes::ktype_tn[node->varType] + " and " + ktypes::ktype_tn[resultReturn]);
 
 		visit_node(node->root, txbreg("rax", node->varType));
 		vartypes[node->name] = node->varType;
