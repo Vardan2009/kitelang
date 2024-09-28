@@ -29,7 +29,7 @@ ktypes::ktype_t semantics::var_would_return(std::shared_ptr<parser::VarNode> nod
 }
 
 bool semantics::compatible(ktypes::ktype_t a, ktypes::ktype_t b) {
-	if ((a == ktypes::INT16 || a == ktypes::INT32 || a == ktypes::INT64 || a == ktypes::CHAR || a == ktypes::BYTE) && (b == ktypes::INT16 || b == ktypes::INT32 || b == ktypes::INT64 || b == ktypes::CHAR || b == ktypes::BYTE))
+	if ((a == ktypes::INT16 || a == ktypes::INT32 || a == ktypes::INT64 || a == ktypes::CHAR || a == ktypes::BYTE || a == ktypes::BOOL) && (b == ktypes::INT16 || b == ktypes::INT32 || b == ktypes::INT64 || b == ktypes::CHAR || b == ktypes::BYTE || b == ktypes::BOOL))
 		return true;
 	if (a == ktypes::ANY || b == ktypes::ANY) return true;
 	return a == b;

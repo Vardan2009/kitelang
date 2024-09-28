@@ -178,3 +178,26 @@ fn strlen(str : ptr8) : int64 {
     }
     return result
 }
+
+~
+streq function
+args:
+    the first string  (char array)
+    the second string (char array)
+usage example:
+    streq("Hello", "Hello") % 1
+returns:
+    a boolean representing if strings are equal or not
+~
+fn streq(str1 : ptr8, str2 : ptr8) : bool {
+    let idx : int64 = 0
+    let a   : char = '\0'
+    let b   : char = '\0'
+    loop {
+        a = str1[idx]
+        b = str2[idx]
+        if a != b return 0
+        if a == '\0' return 1
+        idx = idx + 1
+    }
+}
