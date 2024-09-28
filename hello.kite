@@ -2,11 +2,39 @@ global _start
 
 % TYPES!!!!
 fn _start() : byte {
-    let buffer : char[512]
-    readln(buffer, 512)
-    print("Input Length: ")
-    printi(strlen(buffer))
-    return 0
+    let stra : char[20]
+    readln(stra, 20)
+    let strb : char[20]
+    readln(strb, 20)
+    let oper : char = '\0'
+    oper = readc()
+
+    let a : int64 = stoi(stra)
+    let b : int64 = stoi(stra)
+
+    if oper == '+' {
+        printi(a + b)
+        return 0
+    }
+    if oper == '-' {
+        printi(a - b)
+        return 0
+    }
+    if oper == '*' {
+        printi(a * b)
+        return 0
+    }
+    if oper == '/' {
+        printi(a / b)
+        return 0
+    }
+    if oper == '^' {
+        printi(pow(a, b))
+        return 0
+    }
+
+    print("invalid operation, try +-*/^")
+    return 1
 }
 
 ~
@@ -200,4 +228,53 @@ fn streq(str1 : ptr8, str2 : ptr8) : bool {
         if a == '\0' return 1
         idx = idx + 1
     }
+}
+
+~
+stoi function
+args:
+    integer stored as string (char array)
+usage example:
+    stoi("1234") + 1 % 1235
+returns:
+    number converted to integer
+~
+fn stoi(str : ptr8) : int64 {
+    % str = 123
+    % len = 3
+    let len  : int64 = strlen(str)
+    let chidx : int64 = 0
+    let curl  : byte  = 0
+    % base10 = 100
+    let base10 : int64 = pow(10, len - 1)
+    let result : int64 = 0
+
+    loop {
+        curl = str[chidx] - '0'
+        result = result + base10 * curl
+        if base10 == 1 break
+        base10 = base10 / 10
+        chidx = chidx + 1
+    }
+
+    return result
+}
+
+~
+pow function
+args:
+    base
+    exponent
+usage example
+    pow(10, 3) % 1000
+returns:
+    base to the power of exp (base ^ exp)
+~
+fn pow(base : int64, exp : int64) : int64 {
+    if exp < 0 return 0
+    let result : int64 = 1
+    for i = 0 -> exp - 1 ^ 1 {
+        result = result * base
+    }
+    return result
 }
