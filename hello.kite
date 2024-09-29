@@ -7,8 +7,8 @@ fn _start() : byte {
 	let name : char[512]
 	print("What is your name: ")
 	readln(name, 512)
-	if streq(name, "test") print("[TEST] ")
-	for i = 0 -> 9 ^ 1 {
+	for i = 0 -> 8 ^ 1 {
+		if streq(name, "test") print("[TEST] ")
 		printi(i + 1)
 		print(": Hello, ")
 		print(name)
