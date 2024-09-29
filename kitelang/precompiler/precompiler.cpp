@@ -101,7 +101,7 @@ std::string Precompiler::handleInclude(const std::string& filename, char type) {
 
     std::stringstream buffer;
     buffer << file.rdbuf();
-    return buffer.str();
+    return precompile(buffer.str());
 }
 
 void Precompiler::handleDefine(const std::string& key, const std::string& value) {
