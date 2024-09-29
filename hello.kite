@@ -1,8 +1,5 @@
 global _start
-#include <math.km>
-#include <math.km>
-#include <math.km>
-#include <math.km>
+
 
 fn _start() : byte {
 	print("Hello, World!")

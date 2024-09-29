@@ -3,6 +3,9 @@
 #include <sstream>
 #include <fstream>
 #include <cctype>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 std::string Precompiler::precompile(const std::string& source) {
     std::string result;
@@ -57,7 +60,6 @@ std::string Precompiler::precompile(const std::string& source) {
         }
     }
 
-    // Replace all defined values in the final result
     for (const auto& pair : definitions) {
         std::string key = pair.first;
         std::string value = pair.second;
@@ -72,18 +74,26 @@ std::string Precompiler::precompile(const std::string& source) {
 }
 
 std::string Precompiler::handleInclude(const std::string& filename, char type) {
+    std::string normalizedFilename = fs::path(filename).filename().string();
+
+    if (includedFiles.find(normalizedFilename) != includedFiles.end()) {
+        std::cout << "Skipping already included file: " << normalizedFilename << std::endl;
+        return "";
+    }
+
+    includedFiles.insert(normalizedFilename);
+
     std::string path;
 
     if (!filename.empty()) {
         if (type == '<') {
-            if (loadedkms.find(filename) != loadedkms.end()) return "";
-            loadedkms.insert(filename);
-            path = "stdinclude/" + filename;
+            path = "stdinclude/" + normalizedFilename;
         }
         else if (type == '"')
-            path = filename;
+            path = normalizedFilename;
         else throw std::runtime_error("Invalid include format for " + filename);
-    } else throw std::runtime_error("Empty @include precompiler directive");
+    }
+    else throw std::runtime_error("Empty @include precompiler directive");
 
     std::ifstream file(path);
     if (!file.is_open())
@@ -94,9 +104,6 @@ std::string Precompiler::handleInclude(const std::string& filename, char type) {
     return buffer.str();
 }
 
-
-
 void Precompiler::handleDefine(const std::string& key, const std::string& value) {
-    definitions[key] = value; // Store the definition
-    std::cout << "Defined " << key << " as " << value << std::endl;
+    definitions[key] = value;
 }
