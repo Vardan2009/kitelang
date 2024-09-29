@@ -1,29 +1,29 @@
 global _start
 #include <filesystem.km>
 #include <stdio.km>
+#include <process.km>
+#include <string.km>
 
-; FILE OPERATIONS!!!
 fn _start() : byte {
-	; Open file and get file descriptor
-	let fd : int64 = fopen("/test.txt")
-
-	; if file descriptor is invalid
-	if fd < 0 {
-		print("Failed to open file!\n")
-		return 1
+	loop {
+		let path : char[512]
+		print("What file would you like to open? (type `exit` or press return to exit): ")
+		readln(path, 512)
+		if strlen(path) == 0 break
+		if streq(path, "exit") break
+		printfile(path)
 	}
-	
-	; allocate space for file reading
-	let buf : char[2048]
-
-	; read into buffer
-	readfd(fd, buf, 2048)
-
-	; print the buffer
-	print(buf)
-
-	; close the file
-	fclose(fd)
-
 	return 0
+}
+
+fn printfile(path : ptr8) : void {
+	let fd : int64 = fopen(path)
+	if fd < 0 {
+		print("Failed to load file!\n")
+		exit(1)
+	}
+	let contents : char[4096]
+	readfd(fd, contents, 4096)
+	print(contents)
+	printc('\n')
 }
