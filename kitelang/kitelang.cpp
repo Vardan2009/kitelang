@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// print the result to file stream
-	std::ofstream outFile("../../../../out.asm", std::ios::trunc);
+	std::ofstream outFile("../../../../kbuild/out.asm", std::ios::trunc);
 	if (!outFile) {
 		std::cerr << "Error opening file for writing." << std::endl;
 		return 1;
