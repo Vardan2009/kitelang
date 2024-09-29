@@ -1,5 +1,5 @@
 global _start
-
+#include <stdio.km>
 
 fn _start() : byte {
 	print("Hello, World!")

@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Debugging code to show the modified source
-	std::cout << src;
+	// std::cout << src;
 
 	std::vector<token_ptr> tokens;
 
@@ -75,7 +75,14 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 	
-	// print the result to cout stream
-	// compiler.print(std::cout);
+	// print the result to file stream
+	std::ofstream outFile("../../../../out.asm", std::ios::trunc);
+	if (!outFile) {
+		std::cerr << "Error opening file for writing." << std::endl;
+		return 1;
+	}
+	compiler.print(outFile);
+	outFile.close();
+
 	return 0;
 }
