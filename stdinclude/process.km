@@ -1,0 +1,8 @@
+~
+KITE PROCESS MODULE
+~
+
+fn exit(code : byte) : void {
+	asm "mov rax, 60"
+	asm "syscall"
+}
