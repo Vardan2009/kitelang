@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "precompiler/precompiler.h"
 #include "lexer/lexer.h"
 #include "parser/parser.h"
 #include "compiler/compiler.h"

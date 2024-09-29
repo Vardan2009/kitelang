@@ -22,6 +22,19 @@ int main(int argc, char* argv[]) {
 	ss << file.rdbuf();
 	src = ss.str();
 
+	// Precompilation section
+	try {
+		Precompiler pc;
+		src = pc.precompile(src);
+	}
+	catch (std::runtime_error e) {
+		std::cerr << "kite: precompiler: " << e.what() << std::endl;
+		return 1;
+	}
+
+	// Debugging code to show the modified source
+	std::cout << src;
+
 	std::vector<token_ptr> tokens;
 
 	// Tokenization section
@@ -63,7 +76,6 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// print the result to cout stream
-	compiler.print(std::cout);
-
+	// compiler.print(std::cout);
 	return 0;
 }

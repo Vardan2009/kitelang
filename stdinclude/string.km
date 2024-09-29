@@ -1,0 +1,71 @@
+~
+KITE STRING MODULE
+~
+
+~
+strlen function
+args:
+    the string (char array)
+usage example:
+    strlen("Hello") ; 5
+returns:
+    the length of the string
+~
+fn strlen(str : ptr8) : int64 {
+    let result : int64 = 0
+    loop {
+        if str[result] == '\0' break
+        result = result + 1
+    }
+    return result
+}
+
+~
+streq function
+args:
+    the first string  (char array)
+    the second string (char array)
+usage example:
+    streq("Hello", "Hello") ; 1
+returns:
+    a boolean representing if strings are equal or not
+~
+fn streq(str1 : ptr8, str2 : ptr8) : bool {
+    let idx : int64 = 0
+    let a   : char = '\0'
+    let b   : char = '\0'
+    loop {
+        a = str1[idx]
+        b = str2[idx]
+        if a != b return 0
+        if a == '\0' return 1
+        idx = idx + 1
+    }
+}
+
+~
+stoi function
+args:
+    integer stored as string (char array)
+usage example:
+    stoi("1234") + 1 ; 1235
+returns:
+    number converted to integer
+~
+fn stoi(str : ptr8) : int64 {
+    let len  : int64 = strlen(str)
+    let chidx : int64 = 0
+    let curl  : byte  = 0
+    let base10 : int64 = pow(10, len - 1)
+    let result : int64 = 0
+
+    loop {
+        curl = str[chidx] - '0'
+        result = result + base10 * curl
+        if base10 == 1 break
+        base10 = base10 / 10
+        chidx = chidx + 1
+    }
+
+    return result
+}

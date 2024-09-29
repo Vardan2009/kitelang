@@ -1,0 +1,23 @@
+~
+KITE MATH MODULE
+~
+
+~
+pow function
+args:
+    base
+    exponent
+usage example
+    pow(10, 3) ; 1000
+returns:
+    base to the power of exp (base ^ exp)
+~
+fn pow(base : int64, exp : int64) : int64 {
+    if exp < 0 return 0
+    let result : int64 = 1
+    if exp == 0 return 1
+    for i = 0 -> exp - 1 ^ 1 {
+        result = result * base
+    }
+    return result
+}

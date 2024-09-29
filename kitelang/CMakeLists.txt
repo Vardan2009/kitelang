@@ -17,7 +17,7 @@ add_executable (kitelang
 	"common.h"
 	"common.cpp"
 	"semantics/semantics.h"
-	"semantics/semantics.cpp")
+	"semantics/semantics.cpp" "precompiler/precompiler.h" "precompiler/precompiler.cpp")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET kitelang PROPERTY CXX_STANDARD 20)
