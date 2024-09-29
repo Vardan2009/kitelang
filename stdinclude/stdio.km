@@ -111,7 +111,7 @@ args:
    the buffer (char array)
    the length of the buffer (integer)
 usage example:
-    reads(buffer, 512) ; reads a line from stdin to buffer (max 512 bytes)
+    readln(buffer, 512) ; reads a line from stdin to buffer (max 512 bytes)
 returns:
     none
 ~

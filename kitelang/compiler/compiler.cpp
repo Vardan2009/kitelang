@@ -123,7 +123,9 @@ void compiler::Compiler::visit_idx(std::shared_ptr<parser::IndexNode> node, std:
 	if (varlocs.find(node->name) == varlocs.end())
 		throw std::runtime_error("variable " + node->name + " is not present in this context");
 	visit_node(node->index, "rbx");
+	push("rbx", ktypes::INT64);
 	textSection.push_back("mov " + b64r[reg] + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
+	pop("rbx");
 	ktypes::ktype_t type = vartypes[node->name];
 	if (
 		type == ktypes::PTR8 ||
@@ -207,7 +209,7 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 
 	textSection.push_back("call " + node->routine);
 
-	if (reg != "rax" && reg != "") textSection.push_back("mov " + reg + ", rax");
+	if (b64r[reg] != "rax" && reg != "") textSection.push_back("mov " + b64r[reg] + ", rax");
 }
 
 void compiler::Compiler::visit_extern(std::shared_ptr<parser::ExternNode> node) {
@@ -516,6 +518,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 		}
 		else if (node->left->type == parser::IDX) {  // index access pointer (x[i])
 			std::shared_ptr<parser::IndexNode> n = std::static_pointer_cast<parser::IndexNode>(node->left);
+			push("rax", ktypes::INT64);
 			visit_node(n->index, "rcx");
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(n->name)) + "]");
 			ktypes::ktype_t type = vartypes[std::static_pointer_cast<parser::IndexNode>(node->left)->name];
@@ -545,6 +548,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			else
 				textSection.push_back("imul rcx, rcx, " + std::to_string(ktypes::size(type)));
 			textSection.push_back("add rbx, rcx");
+			pop("rax");
 			textSection.push_back("mov [rbx], rax");
 		}
 		else throw std::runtime_error("invalid LHS of assignment");

@@ -1,0 +1,53 @@
+~
+KITE FILESYSTEM MODULE
+~
+
+~
+readcfd function
+args:
+    file descriptor
+usage example:
+    readcfd(fd)
+returns:
+    the ASCII character
+~
+fn readcfd(fd : int64) : char {
+    asm "xor rax, rax"
+    asm "push rax"
+    asm "mov rsi, rsp"
+    asm "mov rdx, 1"
+    asm "syscall"
+    asm "movzx rax, byte [rsp]"
+    asm "add rsp, 8"
+}
+
+~
+readfd function
+args:
+   the file descriptor
+   the buffer (char array)
+   the length of the buffer (integer)
+usage example:
+    readfd(fd, buffer, 512) ; reads a line from stdin to buffer (max 512 bytes)
+returns:
+    none
+~
+fn readfd(fd : int64, buffer : ptr8, buflen : int64) : void {
+    buffer[buflen - 1] = '\0'
+    let c : char = '\0'
+    for i = 0 -> buflen - 2 ^ 1 {
+        buffer[i] = readcfd(fd)
+        if buffer[i] == 0 break
+    }
+}
+
+fn fopen(filename : ptr8) : int64 {
+    asm "mov rax, 2"
+    asm "mov rsi, 0"
+    asm "syscall"
+}
+
+fn fclose(fd : int64) : void {
+    asm "mov rax, 3"
+    asm "syscall"
+}

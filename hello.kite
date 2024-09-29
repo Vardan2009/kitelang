@@ -1,58 +1,29 @@
 global _start
+#include <filesystem.km>
 #include <stdio.km>
-#include <string.km>
-#include <math.km>
-#define NEWLINE '\n'
 
-~
-simple calculator
-input format
-integer
-integer
-operation (+, -, *, /, ^)
-
-example:
-20
-20
-+
-~
+; FILE OPERATIONS!!!
 fn _start() : byte {
-	let stra : char[20]
-	let strb : char[20]
-	let op   : char = '\0'
-	readln(stra, 20)
-	readln(strb, 20)
-	op = readc()
-	
-	let a : int64 = stoi(stra)
-	let b : int64 = stoi(strb)
+	; Open file and get file descriptor
+	let fd : int64 = fopen("/test.txt")
 
-	if op == '+' {
-		printi(a + b)
-		printc(NEWLINE)
-		return 0
-	}
-	if op == '-' {
-		printi(a - b)
-		printc(NEWLINE)
-		return 0
-	}
-	if op == '*' {
-		printi(a * b)
-		printc(NEWLINE)
-		return 0
-	}
-	if op == '/' {
-		printi(a / b)
-		printc(NEWLINE)
-		return 0
-	}
-	if op == '^' {
-		printi(pow(a, b))
-		printc(NEWLINE)
-		return 0
+	; if file descriptor is invalid
+	if fd < 0 {
+		print("Failed to open file!\n")
+		return 1
 	}
 	
-	print("Invalid operation\n")
-	return 1
+	; allocate space for file reading
+	let buf : char[2048]
+
+	; read into buffer
+	readfd(fd, buf, 2048)
+
+	; print the buffer
+	print(buf)
+
+	; close the file
+	fclose(fd)
+
+	return 0
 }

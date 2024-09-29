@@ -6,9 +6,9 @@ This repository contains a simple compiler for it written in C++ that generates 
 ## Showcase
 - Hello World!
 ```
-global _start
-extern print(ptr)
+#include <stdio.km>
 
+global _start
 fn _start() : byte {
   print("Hello, World!")
   return 0
@@ -16,13 +16,9 @@ fn _start() : byte {
 ```
 - Variables (and basic arithmetic)
 ```
-global _start
-extern {
-  print(ptr64),
-  printi(int64),
-  printc(ptr64)
-}
+#include <stdio.km>
 
+global _start
 fn _start() : byte {
   let x : byte = 9
   let y : byte = 10
@@ -44,9 +40,9 @@ fn _start() : byte {
 ```
 - Functions
 ```
-global _start
-extern printi(int64)
+#include <stdio.km>
 
+global _start
 fn _start() : byte {
   printi(factor(10, 5))
   return 0
@@ -58,13 +54,9 @@ fn factor(a : int64, b : int64) : int64 {
 ```
 - Pointers
 ```
-global _start
-extern {
-  print(ptr64),
-  printi(int64),
-  printc(ptr64)
-}
+#include <stdio.km>
 
+global _start
 fn _start() : byte {
   let value : byte = 20
   let vptr : ptr8 = &value
@@ -81,5 +73,50 @@ fn _start() : byte {
   printi(*vptr)
   printc('\n')
   return 0
+}
+```
+- User Input
+```
+#include <stdio.km>
+
+global _start
+fn _start() : byte {
+	; allocate space for input reading
+	let buf : char[512]
+	; read line into buffer
+	readln(buf, 512)
+
+	return 0
+}
+```
+- File Operations
+```
+#include <filesystem.km>
+#include <stdio.km>
+
+global _start
+fn _start() : byte {
+	; Open file and get file descriptor
+	let fd : int64 = fopen("/test.txt")
+
+	; if file descriptor is invalid
+	if fd < 0 {
+		print("Failed to open file!\n")
+		return 1
+	}
+	
+	; allocate space for file reading
+	let buf : char[2048]
+
+	; read into buffer
+	readfd(fd, buf, 2048)
+
+	; print the buffer
+	print(buf)
+
+	; close the file
+	fclose(fd)
+
+	return 0
 }
 ```
