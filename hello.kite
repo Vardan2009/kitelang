@@ -2,17 +2,57 @@ global _start
 #include <stdio.km>
 #include <string.km>
 #include <math.km>
+#define NEWLINE '\n'
 
+~
+simple calculator
+input format
+integer
+integer
+operation (+, -, *, /, ^)
+
+example:
+20
+20
++
+~
 fn _start() : byte {
-	let name : char[512]
-	print("What is your name: ")
-	readln(name, 512)
-	for i = 0 -> 8 ^ 1 {
-		if streq(name, "test") print("[TEST] ")
-		printi(i + 1)
-		print(": Hello, ")
-		print(name)
-		print("!\n")
+	let stra : char[20]
+	let strb : char[20]
+	let op   : char = '\0'
+	readln(stra, 20)
+	readln(strb, 20)
+	op = readc()
+	
+	let a : int64 = stoi(stra)
+	let b : int64 = stoi(strb)
+
+	if op == '+' {
+		printi(a + b)
+		printc(NEWLINE)
+		return 0
 	}
-	return 0
+	if op == '-' {
+		printi(a - b)
+		printc(NEWLINE)
+		return 0
+	}
+	if op == '*' {
+		printi(a * b)
+		printc(NEWLINE)
+		return 0
+	}
+	if op == '/' {
+		printi(a / b)
+		printc(NEWLINE)
+		return 0
+	}
+	if op == '^' {
+		printi(pow(a, b))
+		printc(NEWLINE)
+		return 0
+	}
+	
+	print("Invalid operation\n")
+	return 1
 }
