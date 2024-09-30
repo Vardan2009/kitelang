@@ -565,7 +565,12 @@ int compiler::Compiler::get_variable_offset(std::string varname) {
 }
 
 void compiler::Compiler::push(std::string reg, ktypes::ktype_t type) {
-	if (reg != txbreg(reg, type))
+	// apparently using movzx for moving from 32 bit register to 64 bit
+	// will result in an error
+	// In 64-bit code, when the destination operand is a 32-bit register
+	// the CPU automatically zero extends the result through the upper 32-bits of the 64-bit register.
+	// That's why the [ktypes::size(type) != 4] condition is here
+	if (reg != txbreg(reg, type) && ktypes::size(type) != 4)
 		textSection.push_back("movzx " + reg + ", " + txbreg(reg, type));
 	textSection.push_back("push " + reg);
 	stacksize += 8;
