@@ -1,29 +1,29 @@
 global _start
-#include <filesystem.km>
 #include <stdio.km>
-#include <process.km>
 #include <string.km>
+#include <process.km>
 
-fn _start() : byte {
-	loop {
-		let path : char[512]
-		print("What file would you like to open? (type `exit` or press return to exit): ")
-		readln(path, 512)
-		if strlen(path) == 0 break
-		if streq(path, "exit") break
-		printfile(path)
+fn _start(argc : int64, argv : ptr64) : byte {
+	if argc == 2 {
+		print("Hello, ")
+		print(argv[1])
+		print("!\n")
+		return 0
 	}
-	return 0
+	if argc == 3 {
+		if streq(argv[2], "-shout") {
+			print("HELLO, ")
+			print(argv[1])
+			print("!!!!!!!!!!!!\n")
+			return 0
+		}
+		err()
+	}
+
+	err()
 }
 
-fn printfile(path : ptr8) : void {
-	let fd : int64 = fopen(path)
-	if fd < 0 {
-		print("Failed to load file!\n")
-		exit(1)
-	}
-	let contents : char[4096]
-	readfd(fd, contents, 4096)
-	print(contents)
-	printc('\n')
+fn err() : void {
+	print("usage: hello <name> [-shout]\n")
+	exit(1)
 }

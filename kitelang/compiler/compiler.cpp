@@ -248,6 +248,11 @@ void compiler::Compiler::visit_continue() {
 void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 	curFn = node->name;
 	textSection.push_back(node->name + ":");
+	// prepare argument count in rdi and first argument pointer in rsi
+	if (node->name == "_start") {
+		textSection.push_back("mov rdi, [rsp]");
+		textSection.push_back("lea rsi, [rsp + 8]");
+	}
 	std::map<std::string, int> oldvars(varlocs);
 	for (int i = 0; i < node->args.size(); i++) {
 		varlocs[node->args[i].name] = stacksize;
@@ -464,8 +469,8 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 		pop("rax");
 
 		int id = cmpLabelCount++;
-		std::string label_true = "boolop_true_" + std::to_string(id);
-		std::string label_end = "boolop_end_" + std::to_string(id);
+		std::string label_true = ".boolop_true_" + std::to_string(id);
+		std::string label_end = ".boolop_end_" + std::to_string(id);
 
 		// Perform comparison
 		if (node->operation == lexer::EQEQ) {
