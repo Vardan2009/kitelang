@@ -231,17 +231,17 @@ void compiler::Compiler::visit_return(std::shared_ptr<parser::ReturnNode> node) 
 }
 
 void compiler::Compiler::visit_break() {
-	textSection.push_back("jmp loop_end_" + std::to_string(curLoopId));
+	textSection.push_back("jmp .loop_end_" + std::to_string(curLoopId));
 }
 
 void compiler::Compiler::visit_continue() {
 	if (std::shared_ptr<parser::ForNode> forNode = std::dynamic_pointer_cast<parser::ForNode>(curLoop)) {
 		visit_node(forNode->stepVal, "rax");
 		textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(forNode->itername)) + "], rax");
-		textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+		textSection.push_back("jmp .loop_" + std::to_string(curLoopId));
 	}
 	else if (std::shared_ptr<parser::LoopNode> loopNode = std::dynamic_pointer_cast<parser::LoopNode>(curLoop)) {
-		textSection.push_back("jmp loop_" + std::to_string(curLoopId));
+		textSection.push_back("jmp .loop_" + std::to_string(curLoopId));
 	}
 }
 
@@ -321,10 +321,10 @@ void compiler::Compiler::visit_loop(std::shared_ptr<parser::LoopNode> node) {
 	int id = cmpLabelCount++;
 	curLoop = node;
 	curLoopId = id;
-	textSection.push_back("loop_" + std::to_string(id) + ":");
+	textSection.push_back(".loop_" + std::to_string(id) + ":");
 	visit_node(node->root);
-	textSection.push_back("jmp loop_" + std::to_string(id));
-	textSection.push_back("loop_end_" + std::to_string(id) + ":");
+	textSection.push_back("jmp .loop_" + std::to_string(id));
+	textSection.push_back(".loop_end_" + std::to_string(id) + ":");
 }
 
 void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
@@ -338,7 +338,7 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	varlocs[node->itername] = stacksize;
 	push("rax", ktypes::INT64);
 
-	textSection.push_back("loop_" + std::to_string(id) + ":");
+	textSection.push_back(".loop_" + std::to_string(id) + ":");
 	if (node->type == parser::ROOT) visit_root(std::static_pointer_cast<parser::RootNode>(node->root));
 	else visit_node(node->root);
 
@@ -346,9 +346,9 @@ void compiler::Compiler::visit_for(std::shared_ptr<parser::ForNode> node) {
 	textSection.push_back("add [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
 	visit_node(node->targetVal, "rax");
 	textSection.push_back("cmp [rsp + " + std::to_string(get_variable_offset(node->itername)) + "], rax");
-	textSection.push_back("jg loop_end_" + std::to_string(id));
-	textSection.push_back("jmp loop_" + std::to_string(id));
-	textSection.push_back("loop_end_" + std::to_string(id) + ": ");
+	textSection.push_back("jg .loop_end_" + std::to_string(id));
+	textSection.push_back("jmp .loop_" + std::to_string(id));
+	textSection.push_back(".loop_end_" + std::to_string(id) + ": ");
 	textSection.push_back("add rsp, " + std::to_string(stacksize - oldStackSize));
 	stacksize = oldStackSize;
 	varlocs = oldvars;
