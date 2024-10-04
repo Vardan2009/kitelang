@@ -1,11 +1,4 @@
 #include "precompiler.h"
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <cctype>
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 std::string Precompiler::precompile(const std::string& source) {
     std::string result;

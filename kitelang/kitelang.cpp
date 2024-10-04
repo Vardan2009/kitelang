@@ -1,6 +1,35 @@
 ﻿
 #include "kitelang.h"
 
+static std::string nthln(const std::string& str, int n) {
+	std::istringstream stream(str);
+	std::string line;
+	int lineNumber = 0;
+
+	while (std::getline(stream, line)) {
+		++lineNumber;
+		if (lineNumber == n) {
+			for (char& ch : line)
+				if (ch == '\t')
+					ch = ' ';
+			return line;
+		}
+	}
+
+	return "";
+}
+
+static void printerr(errors::kiterr e, std::string sender, std::string src) {
+	std::cerr << "kite: " << sender << ": " << e.what() << std::endl;
+	std::cerr << "-----------------------------------" << std::endl;
+	std::cerr << nthln(src, e.line) << std::endl;
+	for (int i = 1; i < e.pos_start; i++) std::cerr << ' ';
+	for (int i = 0; i < e.pos_end - e.pos_start; i++) std::cerr << '^';
+	if (e.pos_end == e.pos_start) std::cerr << '^';
+	std::cerr << " HERE" << std::endl;
+	std::cerr << "-----------------------------------" << std::endl;
+}
+
 int main(int argc, char* argv[]) {
 	// if the count of the arguments is not 2, then the syntax is incorrect, print usage and exit
 	if (argc != 2) {
@@ -42,8 +71,8 @@ int main(int argc, char* argv[]) {
 		lexer::Lexer lex(src);
 		tokens = lex.tokenize();
 	}
-	catch (std::runtime_error e) {
-		std::cerr << "kite: lexer: " << e.what() << std::endl;
+	catch (errors::kiterr e) {
+		printerr(e, "lexer", src);
 		return 1;
 	}
 
@@ -58,8 +87,9 @@ int main(int argc, char* argv[]) {
 	try {
 		// Try parsing and get the reference to the root node in `root`
 		root = parser.parse();
-	} catch (std::runtime_error e) {
-		std::cerr << "kite: parser: " << e.what() << " at token index " << parser.ptr << std::endl;
+	}
+	catch (errors::kiterr e) {
+		printerr(e, "parser", src);
 		return 1;
 	}
 
@@ -70,8 +100,9 @@ int main(int argc, char* argv[]) {
 	try {
 		// start code generation
 		compiler.codegen();
-	} catch (std::runtime_error e) {
-		std::cerr << "kite: compiler: " << e.what() << std::endl;
+	}
+	catch (errors::kiterr e) {
+		printerr(e, "compiler", src);
 		return 1;
 	}
 	

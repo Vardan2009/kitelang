@@ -6,6 +6,8 @@
 #include <set>
 #include <stdexcept>
 #include <algorithm>
+#include <iostream>
+#include "../errors/errors.h"
 
 // define an alias for a shared ptr to token object token_ptr
 typedef std::shared_ptr<lexer::Token> token_ptr;
@@ -56,6 +58,10 @@ namespace lexer {
 			"extern", "global", "fn", "let", "for", "cmp", "asm", "eq", "neq", "return", "break", "continue", "loop", "if",
 			"void", "char", "byte", "bool", "int16","int32", "int64", "ptr8", "ptr16", "ptr32", "ptr64"
 		};
+		// The current line and position
+		int line = 0;
+		int pos = 0;
+		// The source code
 		std::string src;
 		// the pointer to the current character
 		int ptr = 0;
@@ -69,6 +75,7 @@ namespace lexer {
 		token_ptr make_with_prefix(token_t); // for making and returning an identifier with a prefix     (e.g `^rax` or `*ptr`)
 		void skip_comment();                 // for skipping single line comments                        (e.g % test)
 		void skip_multiline_comment();       // for skipping multiline comments                          (e.g ~ test ~)
+		char advance();						 // for advancing to next character and keeping line and pos count right
 	public:
 	    // the constructor that takes the source code and resets the character pointer
 		Lexer(std::string src) {

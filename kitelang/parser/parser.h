@@ -1,6 +1,7 @@
 #pragma once
 #include "node.h"
 #include "../common.h"
+#include "../errors/errors.h"
 
 namespace parser {
 	class Parser {
@@ -9,7 +10,7 @@ namespace parser {
 
 		std::shared_ptr<CompDirectNode> comp_direct();
 
-		std::shared_ptr<RootNode> statement_list();
+		std::shared_ptr<RootNode> statement_list(bool = false);
 		std::shared_ptr<Node> statement();
 		std::shared_ptr<Node> expr();
 		std::shared_ptr<Node> term();
@@ -38,7 +39,7 @@ namespace parser {
 		Parser(std::vector<std::shared_ptr<lexer::Token>> t) : tokens(t), ptr(0) {
 		}
 		std::shared_ptr<RootNode> parse() {
-			return statement_list();
+			return statement_list(true);
 		}
 	};
 }

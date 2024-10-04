@@ -56,7 +56,7 @@ void compiler::Compiler::visit_node(std::shared_ptr<parser::Node> node, std::str
 	case parser::CDIRECT: return visit_cdirect(std::static_pointer_cast<parser::CompDirectNode>(node));
 	case parser::ADDROF: return visit_addrof(std::static_pointer_cast<parser::AddrOfNode>(node), reg);
 	case parser::DEREF: return visit_deref(std::static_pointer_cast<parser::DerefNode>(node), reg);
-	default: throw std::runtime_error("yet unsupported keyword " + std::to_string(node->type));
+	default: throw errors::kiterr("unsupported keyword " + std::to_string(node->type), node->line, node->pos_start, node->pos_end);
 	}
 }
 
@@ -102,26 +102,26 @@ void compiler::Compiler::visit_reg(std::shared_ptr<parser::RegNode> node, std::s
 
 void compiler::Compiler::visit_addrof(std::shared_ptr<parser::AddrOfNode> node, std::string reg) {
 	if (varlocs.find(node->name) == varlocs.end())
-		throw std::runtime_error("variable " + node->name + " is not present in this context");
+		throw errors::kiterr("variable " + node->name + " is not present in this context", node->line, node->pos_start, node->pos_end);
 	textSection.push_back("lea " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
 
 void compiler::Compiler::visit_deref(std::shared_ptr<parser::DerefNode> node, std::string reg) {
 	if (varlocs.find(node->name) == varlocs.end())
-		throw std::runtime_error("variable " + node->name + " is not present in this context");
+		throw errors::kiterr("variable " + node->name + " is not present in this context", node->line, node->pos_start, node->pos_end);
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 	textSection.push_back("mov " + reg + ", [" + reg + "]");
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {
 	if (varlocs.find(node->name) == varlocs.end())
-		throw std::runtime_error("variable " + node->name + " is not present in this context");
+		throw errors::kiterr("variable " + node->name + " is not present in this context", node->line, node->pos_start, node->pos_end);
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
 }
 
 void compiler::Compiler::visit_idx(std::shared_ptr<parser::IndexNode> node, std::string reg) {
 	if (varlocs.find(node->name) == varlocs.end())
-		throw std::runtime_error("variable " + node->name + " is not present in this context");
+		throw errors::kiterr("variable " + node->name + " is not present in this context", node->line, node->pos_start, node->pos_end);
 	visit_node(node->index, "rbx");
 	push("rbx", ktypes::INT64);
 	textSection.push_back("mov " + b64r[reg] + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
@@ -192,13 +192,13 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 	// }
 
 	if (fns[node->routine].argtps.size() != node->args.size())
-		throw std::runtime_error("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()));
+		throw errors::kiterr("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()), node->line, node->pos_start, node->pos_end);
 
 	for (int i = 0; i < node->args.size(); i++) {
 		ktypes::ktype_t resultReturn = semantics::would_return(node->args[i], vartypes, fns);
 
 		if (!semantics::compatible(fns[node->routine].argtps[i], resultReturn))
-			throw std::runtime_error("function " + node->routine + ", argument " + std::to_string(i + 1) + ": incompatible types " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " and " + ktypes::ktype_tn[resultReturn]);
+			throw errors::kiterr("function " + node->routine + ", argument " + std::to_string(i + 1) + ": incompatible types " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " and " + ktypes::ktype_tn[resultReturn], node->args[i]->line, node->args[i]->pos_start, node->args[i]->pos_end);
 
 		visit_node(node->args[i], txbreg("rax", fns[node->routine].argtps[i]));
 		push("rax", fns[node->routine].argtps[i]);
@@ -366,7 +366,7 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 		varlocs[node->name] = stacksize;
 		switch (ktypes::size(node->varType)) {
 		case 0:
-			throw std::runtime_error("cannot create array with void type");
+			throw errors::kiterr("cannot create array with void type", node->line, node->pos_start, node->pos_end);
 		case 1:
 			vartypes[node->name] = ktypes::PTR8;
 			break;
@@ -385,7 +385,7 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 	else {
 		ktypes::ktype_t resultReturn = semantics::would_return(node->root, vartypes, fns);
 		if(!semantics::compatible(node->varType, resultReturn))
-			throw std::runtime_error("incompatible types " + ktypes::ktype_tn[node->varType] + " and " + ktypes::ktype_tn[resultReturn]);
+			throw errors::kiterr("incompatible types " + ktypes::ktype_tn[node->varType] + " and " + ktypes::ktype_tn[resultReturn], node->line, node->pos_start, node->pos_end);
 
 		visit_node(node->root, txbreg("rax", node->varType));
 		vartypes[node->name] = node->varType;
@@ -395,15 +395,12 @@ void compiler::Compiler::visit_let(std::shared_ptr<parser::LetNode> node) {
 }
 
 void compiler::Compiler::visit_cdirect(std::shared_ptr<parser::CompDirectNode> node) {
-	if (node->name == "stackszinc") {
+	if (node->name == "stackszinc")
 		stacksize += node->val;
-	}
-	else if (node->name == "stackszdec") {
+	else if (node->name == "stackszdec")
 		stacksize -= node->val;
-	}
-	else {
-		throw std::runtime_error("Invalid compiler directive " + node->name);
-	}
+	else
+		throw errors::kiterr("Invalid compiler directive " + node->name, node->line, node->pos_start, node->pos_end);
 }
 
 // this part is VERY complicated
@@ -517,7 +514,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 				type != ktypes::PTR32 &&
 				type != ktypes::PTR64
 				)
-				throw std::runtime_error("cannot dereference a non-pointer");
+				throw errors::kiterr("cannot dereference a non-pointer", node->left->line, node->left->pos_start, node->left->pos_end);
 			textSection.push_back("mov rbx, [rsp + " + std::to_string(get_variable_offset(std::static_pointer_cast<parser::DerefNode>(node->left)->name)) +"]");
 			textSection.push_back("mov [rbx], rax");
 		}
@@ -556,7 +553,7 @@ void compiler::Compiler::visit_binop(std::shared_ptr<parser::BinOpNode> node, st
 			pop("rax");
 			textSection.push_back("mov [rbx], rax");
 		}
-		else throw std::runtime_error("invalid LHS of assignment");
+		else throw errors::kiterr("invalid lhs of assignment", node->left->line, node->left->pos_start, node->left->pos_end);
 	}
 
 	// Store the result in the appropriate register

@@ -1,9 +1,11 @@
 #include "lexer.h"
-#include <iostream>
 
 std::vector<token_ptr> lexer::Lexer::tokenize() {
 	// initialize the array (vector)
-	std::vector<token_ptr> result;
+	std::vector<token_ptr> result {};
+	// Initialize line and position counters
+	this->line = 1;
+	this->pos = 1;
 
 	// while the pointer is in the bounds of the characters
 	while (ptr < src.size()) {
@@ -34,10 +36,10 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 		// if it is a multiline comment prefix, skip the comment
 		else if (src[ptr] == '~') skip_multiline_comment();
 		// ignore whitespace
-		else if (isspace(src[ptr])) ++ptr;
+		else if (isspace(src[ptr])) advance();
 		// case for invalid characters
 		else
-			throw std::runtime_error("invalid character `" + std::to_string(src[ptr]) + "`");
+			throw errors::kiterr("invalid character `" + std::to_string(src[ptr]) + "`", this->line, this->pos, this->pos);
 	}
 	return result;
 }
@@ -45,11 +47,12 @@ std::vector<token_ptr> lexer::Lexer::tokenize() {
 token_ptr lexer::Lexer::make_identifier() {
 	// this will store the result
 	std::string result;
+	int pos_start = this->pos;
 
 	// while the current character is alphanumeric or an underscore
 	while (isalnum(src[ptr]) || src[ptr] == '_') {
 		// add to the result and increment the pointer
-		result += src[ptr++];
+		result += advance();
 	}
 
 	// determine if the "word" is an identifier or a keyword
@@ -59,25 +62,28 @@ token_ptr lexer::Lexer::make_identifier() {
 		? KEYWORD
 		: IDENTIFIER;
 
-	return std::make_shared<Token>(type, result);
+	return std::make_shared<Token>(type, result, this->line, pos_start, this->pos);
 }
 
 token_ptr lexer::Lexer::make_int() {
 	// this will store the result (as a string for now)
 	std::string result;
+	int pos_start = this->pos;
 
 	// while it is a digit, add to the result and increment the pointer
 	while (isdigit(src[ptr])) {
-		result += src[ptr++];
+		result += advance();
 	}
 
 	// convert the result to integer (atoi) and return
-	return std::make_shared<Token>(INT_LIT, std::atoi(result.c_str()));
+	return std::make_shared<Token>(INT_LIT, std::atoi(result.c_str()), this->line, pos_start, this->pos);
 }
 
 token_ptr lexer::Lexer::make_string() {
+	int pos_start = this->pos;
+	int line_start = this->line;
 	// skip through the double quote
-	ptr++;
+	advance();
 
 	// this will store the result
 	std::string result;
@@ -85,18 +91,20 @@ token_ptr lexer::Lexer::make_string() {
 	// while the current character is not a closing quote
 	while (src[ptr] != '"') {
 		if (src[ptr] == '\\')
-			result += src[ptr++];
-		result += src[ptr++];
+			result += advance();
+		result += advance();
 	}
 
 	// skip through the closing double quote
-	ptr++;
-	return std::make_shared<Token>(STRING_LIT, result);
+	advance();
+	return std::make_shared<Token>(STRING_LIT, result, line_start, pos_start, pos_start);
 }
 
 token_ptr lexer::Lexer::make_with_prefix(token_t type) {
+	int pos_start = this->pos;
+
 	// skip through the prefix
-	ptr++;
+	advance();
 
 	// this will store the result
 	std::string result;
@@ -104,19 +112,21 @@ token_ptr lexer::Lexer::make_with_prefix(token_t type) {
 	// while the current character is alphanumeric or an underscore
 	while (isalnum(src[ptr])) {
 		// add to the result and increment the pointer
-		result += src[ptr++];
+		result += advance();
 	}
 
-	return std::make_shared<Token>(type, result);
+	return std::make_shared<Token>(type, result, this->line, pos_start, this->pos);
 }
 
 token_ptr lexer::Lexer::make_char() {
+	int pos_start = this->pos;
+
 	// skip through the single quote
-	ptr++;
+	advance();
 	// get the result and increment, since it is guaranteed to be a single character
-	char result = src[ptr++];
+	char result = advance();
 	if (result == '\\') {
-		char code = src[ptr++];
+		char code = advance();
 		switch (code) {
 		case 'n':
 			result = '\n';
@@ -137,19 +147,19 @@ token_ptr lexer::Lexer::make_char() {
 			result = '\"';
 			break;
 		default:
-			throw std::runtime_error("invalid escape character " + std::to_string(code));
+			throw errors::kiterr("invalid escape character " + std::to_string(code), this->line, this->pos, this->pos);
 		}
 	}
 	// skip through the closing single quote
-	ptr++;
-	return std::make_shared<Token>(CHAR_LIT, result);
+	advance();
+	return std::make_shared<Token>(CHAR_LIT, result, this->line, pos_start, this->pos);
 }
 
 token_ptr lexer::Lexer::make_special() {
 	// get the token type and value from the specials map (lexer.h)
-	token_ptr e = std::make_shared<Token>(specials[src[ptr]], std::to_string(src[ptr]));
+	token_ptr e = std::make_shared<Token>(specials[src[ptr]], std::to_string(src[ptr]), this->line, this->pos, this->pos);
 	// advance and return
-	ptr++;
+	advance();
 	return e;
 }
 
@@ -161,27 +171,41 @@ token_ptr lexer::Lexer::make_special_two() {
 		specialsTwoChar[
 			key
 		],
-		key
+		key,
+		this->line,
+		this->pos,
+		this->pos + 1
 	);
 	// advance and return
-	ptr += 2;
+	advance();
+	advance();
 	return e;
 }
 
 void lexer::Lexer::skip_comment() {
 	// while the pointer is in the bounds and not encountered newline, advance
-	while (src[ptr] != '\n' && ptr < src.size()) {
-		ptr++;
-	}
+	while (src[ptr] != '\n' && ptr < src.size()) advance();
 	// skip the newline
-	ptr++;
+	advance();
 }
 
 void lexer::Lexer::skip_multiline_comment() {
 	// advance through the ~
-	++ptr;
+	advance();
 	// while still in bounds
 	while (ptr < src.size())
 		// if encountered closing comment, break
-		if (src[ptr++] == '~') break;
+		if (advance() == '~') break;
+}
+
+char lexer::Lexer::advance() {
+	// if it is a line break
+	if (src[ptr] == '\n') {
+		// reset position counter and
+		// increment line counter
+		pos = 1;
+		++line;
+	}
+	else ++pos;
+	return src[ptr++];
 }
