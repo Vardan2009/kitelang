@@ -20,14 +20,13 @@ static std::string nthln(const std::string& str, int n) {
 }
 
 static void printerr(errors::kiterr e, std::string sender, std::string src) {
-	std::cerr << "kite: " << sender << ": " << e.what() << std::endl;
-	std::cerr << "-----------------------------------" << std::endl;
-	std::cerr << nthln(src, e.line) << std::endl;
-	for (int i = 1; i < e.pos_start; i++) std::cerr << ' ';
+	std::string ln = std::to_string(e.line) + ": ";
+	std::cerr << "kite: " << sender << ": " << e.what() << " at line " << e.line << std::endl << std::endl;
+	std::cerr << ln << nthln(src, e.line) << std::endl;
+	for (int i = 1; i < e.pos_start + ln.size(); i++) std::cerr << ' ';
 	for (int i = 0; i < e.pos_end - e.pos_start; i++) std::cerr << '^';
 	if (e.pos_end == e.pos_start) std::cerr << '^';
 	std::cerr << " HERE" << std::endl;
-	std::cerr << "-----------------------------------" << std::endl;
 }
 
 int main(int argc, char* argv[]) {
