@@ -5,6 +5,6 @@ fn _start(
 		argc : int64,
 		argv : ptr64
 ) : byte {
-	print("Hello, stdio!\n")
+	print(argv[0])
 	return 0
 }
