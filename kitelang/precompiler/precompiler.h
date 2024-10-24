@@ -17,5 +17,8 @@ public:
 
 private:
     std::unordered_map<std::string, std::string> definitions{};
-    void handle_define(const std::string& key, const std::string& value);
+    std::set<std::string> includedFiles{}; // Track included files
+
+    std::string handleInclude(const std::string&, char);
+    void handleDefine(const std::string& key, const std::string& value);
 };
