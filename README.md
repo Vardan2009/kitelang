@@ -10,8 +10,8 @@ This repository contains a simple compiler for it written in C++ that generates 
 
 global _start
 fn _start() : byte {
-  print("Hello, World!")
-  return 0
+	print("Hello, World!")
+	return 0
 }
 ```
 - Variables (and basic arithmetic)
@@ -20,22 +20,22 @@ fn _start() : byte {
 
 global _start
 fn _start() : byte {
-  let x : byte = 9
-  let y : byte = 10
+	let x : byte = 9
+	let y : byte = 10
 
-  print("x: ")
-  printi(x)
-  printc('\n')
+	print("x: ")
+	printi(x)
+	printc('\n')
 
-  print("y: ")
-  printi(y)
-  printc('\n')
+	print("y: ")
+	printi(y)
+	printc('\n')
 
-  print("x + y: ")
-  printi(x + y)
-  printc('\n')
+	print("x + y: ")
+  	printi(x + y)
+  	printc('\n')
 
-  return 0
+  	return 0
 }
 ```
 - Functions
@@ -44,12 +44,12 @@ fn _start() : byte {
 
 global _start
 fn _start() : byte {
-  printi(factor(10, 5))
-  return 0
+	printi(factor(10, 5))
+	return 0
 }
 
 fn factor(a : int64, b : int64) : int64 {
-  return a * b
+	return a * b
 }
 ```
 - Pointers
@@ -58,21 +58,21 @@ fn factor(a : int64, b : int64) : int64 {
 
 global _start
 fn _start() : byte {
-  let value : byte = 20
-  let vptr : ptr8 = &value
+	let value : byte = 20
+	let vptr : ptr8 = &value
 
-  print("The Value: ")
-  printi(value)
-  printc('\n')
+  	print("The Value: ")
+  	printi(value)
+  	printc('\n')
 
-  print("The Address: ")
-  printi(vptr)
-  printc('\n')
+  	print("The Address: ")
+  	printi(vptr)
+  	printc('\n')
 
-  print("Dereferenced Pointer Value: ")
-  printi(*vptr)
-  printc('\n')
-  return 0
+  	print("Dereferenced Pointer Value: ")
+  	printi(*vptr)
+  	printc('\n')
+  	return 0
 }
 ```
 - User Input
