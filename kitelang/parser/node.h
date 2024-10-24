@@ -363,7 +363,8 @@ namespace parser {
 	};
 	class IfNode : public Node {
 	public:
-		std::shared_ptr<Node> condition, block;
+		std::shared_ptr<Node> condition, block, else_block;
+		bool has_else_block;
 		IfNode(std::shared_ptr<Node> condition, std::shared_ptr<Node> block, int line, int pos_start, int pos_end)
 			: condition(condition), block(block) {
 			type = IF;

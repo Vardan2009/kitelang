@@ -222,7 +222,13 @@ std::shared_ptr<parser::IfNode> parser::Parser::if_node() {
 	std::shared_ptr<lexer::Token> t = advance();
 	std::shared_ptr<Node> condition = expr();
 	std::shared_ptr<Node> block = statement();
-	return std::make_shared<IfNode>(condition, block, t->line, t->pos_start, t->pos_end);
+	std::shared_ptr<IfNode> ifn = std::make_shared<IfNode>(condition, block, t->line, t->pos_start, t->pos_end);
+	if (peek()->type == lexer::KEYWORD && peek()->value_str == "else") {
+		consume(lexer::KEYWORD, "else");
+		ifn->else_block = statement();
+		ifn->has_else_block = true;
+	}
+	return ifn;
 }
 
 std::shared_ptr<parser::CmpNode> parser::Parser::cmp_node() {

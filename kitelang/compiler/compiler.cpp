@@ -279,13 +279,28 @@ void compiler::Compiler::visit_fn(std::shared_ptr<parser::FnNode> node) {
 
 void compiler::Compiler::visit_if(std::shared_ptr<parser::IfNode> node) {
 	int id = cmpLabelCount++;
+
 	visit_node(node->condition, "rax");
 	textSection.push_back("cmp rax, 0");
+
 	textSection.push_back("jne .if_true_" + std::to_string(id));
-	textSection.push_back("jmp .if_end_" + std::to_string(id));
+
+	if (node->has_else_block)
+		textSection.push_back("jmp .if_else_" + std::to_string(id)); 
+	else
+		textSection.push_back("jmp .if_end_" + std::to_string(id));
+
 	textSection.push_back(".if_true_" + std::to_string(id) + ":");
 	visit_node(node->block);
+
+	if (node->has_else_block) {
+		textSection.push_back("jmp .if_end_" + std::to_string(id));
+		textSection.push_back(".if_else_" + std::to_string(id) + ":");
+		visit_node(node->else_block);
+	}
+
 	textSection.push_back(".if_end_" + std::to_string(id) + ":");
+
 }
 
 void compiler::Compiler::visit_cmp(std::shared_ptr<parser::CmpNode> node) {
