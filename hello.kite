@@ -1,7 +1,7 @@
 global _start
-#include <stdio.km>
-#include <string.km>
-#include <process.km>
+using stdio
+using string
+using process
 
 fn _start(argc : int64, argv : ptr64) : byte {
 	if argc == 2 {
