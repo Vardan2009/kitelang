@@ -80,13 +80,13 @@ std::string Precompiler::handleInclude(const std::string& filename, char type) {
 
     if (!filename.empty()) {
         if (type == '<') {
-            path = "stdinclude/" + normalizedFilename;
+            path = "stdlib/include/" + normalizedFilename;
         }
         else if (type == '"')
             path = normalizedFilename;
         else throw std::runtime_error("Invalid include format for " + filename);
     }
-    else throw std::runtime_error("Empty @include precompiler directive");
+    else throw std::runtime_error("Empty #include precompiler directive");
 
     std::ifstream file(path);
     if (!file.is_open())

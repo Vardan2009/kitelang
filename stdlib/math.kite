@@ -12,6 +12,7 @@ usage example
 returns:
     base to the power of exp (base ^ exp)
 ~
+global pow
 fn pow(base : int64, exp : int64) : int64 {
     if exp < 0 return 0
     let result : int64 = 1

@@ -1,0 +1,5 @@
+extern {
+	strlen(ptr8) : int64,
+	streq(ptr8, ptr8) : bool,
+	stoi(ptr8) : int64,
+}

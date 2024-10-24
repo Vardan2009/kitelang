@@ -1,0 +1,6 @@
+extern {
+	readcfd(int64) : char,
+	readfd(int64, ptr8, int64) : void,
+	fopen(ptr8) : int64,
+	fclose(int64) : void,
+}

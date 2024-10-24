@@ -1,0 +1,3 @@
+extern {
+	pow(int64, int64) : int64
+}

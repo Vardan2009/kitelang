@@ -1,5 +1,6 @@
 ﻿
 #include "kitelang.h"
+#include <filesystem>
 
 static std::string nthln(const std::string& str, int n) {
 	std::istringstream stream(str);
@@ -32,18 +33,22 @@ static void printerr(errors::kiterr e, std::string sender, std::string src) {
 int main(int argc, char* argv[]) {
 	// if the count of the arguments is not 2, then the syntax is incorrect, print usage and exit
 	if (argc != 2) {
-		std::cerr << "kite: usage: kite (path/to/file.kite)" << std::endl;
+		std::cerr << "kite: usage: kite (path/to/source.kite)" << std::endl;
 		return 1;
 	}
 
 	std::ifstream file(argv[1]);
 	std::string src;
 
+	std::filesystem::path path(argv[1]);
+
 	// exit if file failed to open
 	if (!file.is_open() || !file) {
 		std::cerr << "kite: failed to open file" << std::endl;
 		return 1;
 	}
+
+	std::filesystem::current_path(path.parent_path());
 
 	// read the file into src
 	std::ostringstream ss;
@@ -106,13 +111,30 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// print the result to file stream
-	std::ofstream outFile("../../../../kbuild/out.asm", std::ios::trunc);
+	system("mkdir kbuild");
+	std::ofstream outFile("kbuild/" + path.filename().replace_extension().string() + ".asm", std::ios::trunc);
 	if (!outFile) {
 		std::cerr << "Error opening file for writing." << std::endl;
 		return 1;
 	}
 	compiler.print(outFile);
 	outFile.close();
+
+	std::string projname = path.filename().replace_extension().string();
+	std::string stdlibobjs = "stdlib/obj/*.o";
+
+	// build executable (NASM and LD required)
+
+	// build to object file (NASM required)
+	std::cout << "nasm -felf64 -o kbuild/" + projname + ".o kbuild/" + projname + ".asm\n";
+
+	// comment out if running linux with nasm and ld
+	// system(("nasm -felf64 -o kbuild/" + projname + ".o kbuild/" + projname + ".asm").c_str());
+
+	// link with stdlibs
+	std::cout << "ld -o kbuild/" + projname + " kbuild/" + projname + ".o " + stdlibobjs << std::endl;
+	// comment out if running linux with nasm and ld
+	// system(("ld -o kbuild/" + projname + " kbuild/" + projname + ".o " + stdlibobjs).c_str());
 
 	return 0;
 }

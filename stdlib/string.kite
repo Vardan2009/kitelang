@@ -12,6 +12,7 @@ usage example:
 returns:
     the length of the string
 ~
+global strlen
 fn strlen(str : ptr8) : int64 {
     let result : int64 = 0
     loop {
@@ -31,6 +32,7 @@ usage example:
 returns:
     a boolean representing if strings are equal or not
 ~
+global streq
 fn streq(str1 : ptr8, str2 : ptr8) : bool {
     let idx : int64 = 0
     let a   : char = '\0'
@@ -53,6 +55,7 @@ usage example:
 returns:
     number converted to integer
 ~
+global stoi
 fn stoi(str : ptr8) : int64 {
     let len  : int64 = strlen(str)
     let chidx : int64 = 0

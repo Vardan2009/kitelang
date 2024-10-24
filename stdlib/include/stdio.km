@@ -1,0 +1,7 @@
+extern {
+	print(ptr8) : void,
+	printc(char) : void,
+	printi(int64) : void,
+	readc() : char,
+	readln(ptr8, int64) : void,
+}

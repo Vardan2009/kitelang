@@ -11,6 +11,7 @@ usage example:
 returns:
     the ASCII character
 ~
+global readcfd
 fn readcfd(fd : int64) : char {
     asm "xor rax, rax"
     asm "push rax"
@@ -32,6 +33,7 @@ usage example:
 returns:
     none
 ~
+global readfd
 fn readfd(fd : int64, buffer : ptr8, buflen : int64) : void {
     buffer[buflen - 1] = '\0'
     let c : char = '\0'
@@ -41,12 +43,14 @@ fn readfd(fd : int64, buffer : ptr8, buflen : int64) : void {
     }
 }
 
+global fopen
 fn fopen(filename : ptr8) : int64 {
     asm "mov rax, 2"
     asm "mov rsi, 0"
     asm "syscall"
 }
 
+global fclose
 fn fclose(fd : int64) : void {
     asm "mov rax, 3"
     asm "syscall"

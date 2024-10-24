@@ -11,6 +11,7 @@ usage example:
 returns:
     none
 ~
+global print
 fn print(str : ptr8) : void {
     asm "push rdi"                      ; preserve the pointer to the string on the stack
     asm "mov rax, 1"                    ; RAX - syscall id for write
@@ -40,6 +41,7 @@ usage example:
 returns:
     none
 ~
+global printc
 fn printc(int : char) : void {
     asm "push rdi"                    ; preserve the original RDI value
     asm "mov rax, 1"                  ; syscall id for write
@@ -59,6 +61,7 @@ usage example:
 returns:
     none
 ~
+global printi
 fn printi(int : int64) : void {
     asm "mov rbp, 0"                  ; initialize a counter for digits
     asm ".convert_loop:"              ; start of the conversion loop
@@ -93,6 +96,7 @@ usage example:
 returns:
     the ASCII character value of the inputted character
 ~
+global readc
 fn readc() : char {
     @stackszinc 8                     ; increase stack size (used for the compiler)
     asm "sub rsp, 8"                  ; allocate space on the stack
@@ -115,6 +119,7 @@ usage example:
 returns:
     none
 ~
+global readln
 fn readln(buffer : ptr8, buflen : int64) : void {
     let c       : char = '\0'
     buffer[buflen - 1] = '\0'

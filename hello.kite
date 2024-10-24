@@ -1,29 +1,10 @@
-global _start
 #include <stdio.km>
-#include <string.km>
-#include <process.km>
 
-fn _start(argc : int64, argv : ptr64) : byte {
-	if argc == 2 {
-		print("Hello, ")
-		print(argv[1])
-		print("!\n")
-		return 0
-	}
-	if argc == 3 {
-		if streq(argv[2], "-shout") {
-			print("HELLO, ")
-			print(argv[1])
-			print("!!!!!!!!!!!!\n")
-			return 0
-		}
-		err()
-	}
-
-	err()
-}
-
-fn err() : void {
-	print("usage: hello <name> [-shout]\n")
-	exit(1)
+global _start
+fn _start(
+		argc : int64,
+		argv : ptr64
+) : byte {
+	print("Hello, stdio!\n")
+	return 0
 }

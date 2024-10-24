@@ -2,6 +2,7 @@
 KITE PROCESS MODULE
 ~
 
+global exit
 fn exit(code : byte) : void {
 	asm "mov rax, 60"
 	asm "syscall"
