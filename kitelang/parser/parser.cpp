@@ -154,13 +154,20 @@ std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 	if (peek()->type == lexer::LBRACE) {
 		std::vector<ktypes::kfndec_t> fns {};
 		consume(lexer::LBRACE);
+
 		while (peek()->type != lexer::RBRACE) {
 			if (peek()->type != lexer::IDENTIFIER)
 				throw errors::kiterr("expected identifier", peek()->line, peek()->pos_start, peek()->pos_end);
 			std::string name = advance()->value_str;
 			std::vector<ktypes::ktype_t> types{};
 			consume(lexer::LPAREN);
+			bool is_variadic = false;
 			while (peek()->type != lexer::RPAREN) {
+				if (peek()->type == lexer::VAARG) {
+					advance();
+					is_variadic = true;
+					break;
+				}
 				types.push_back(type());
 				if (peek()->type == lexer::RPAREN) break;
 				consume(lexer::COMMA);
@@ -168,7 +175,7 @@ std::shared_ptr<parser::ExternNode> parser::Parser::extern_node() {
 			consume(lexer::RPAREN);
 			consume(lexer::COLON);
 			ktypes::ktype_t returns = type();
-			fns.push_back(ktypes::kfndec_t{name, types, returns});
+			fns.push_back(ktypes::kfndec_t{name, types, returns, is_variadic});
 			if (peek()->type == lexer::RBRACE) break;
 			consume(lexer::COMMA);
 		}
@@ -200,8 +207,14 @@ std::shared_ptr<parser::FnNode> parser::Parser::fn_node() {
 	std::shared_ptr<lexer::Token> t = advance();
 	std::string name = advance()->value_str;
 	std::vector <ktypes::kval_t> args {};
+	bool is_variadic = false;
 	consume(lexer::LPAREN);
 	while (peek()->type != lexer::RPAREN) {
+		if (peek()->type == lexer::VAARG) {
+			advance();
+			is_variadic = true;
+			break;
+		}
 		if (peek()->type != lexer::IDENTIFIER)
 			throw errors::kiterr("expected identifier", peek()->line, peek()->pos_start, peek()->pos_end);
 		std::string argnm = advance()->value_str;
@@ -215,7 +228,7 @@ std::shared_ptr<parser::FnNode> parser::Parser::fn_node() {
 	consume(lexer::COLON);
 	ktypes::ktype_t returns = type();
 	std::shared_ptr<RootNode> root = statement_list();
-	return std::make_shared<FnNode>(name, args, returns, root, t->line, t->pos_start, t->pos_end);
+	return std::make_shared<FnNode>(name, args, returns, root, is_variadic, t->line, t->pos_start, t->pos_end);
 }
 
 std::shared_ptr<parser::IfNode> parser::Parser::if_node() {

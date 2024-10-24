@@ -34,6 +34,7 @@ namespace lexer {
 		COLON,
 		CARET,
 		ARROW,
+		VAARG,
 		MOD
 	} token_t;
 

@@ -7,7 +7,7 @@ void compiler::Compiler::codegen() {
 			std::vector<ktypes::ktype_t> types;
 			for (int i = 0; i < node->args.size(); i++)
 				types.push_back(node->args[i].type);
-			fns[node->name] = ktypes::kfndec_t{ node->name, types, node->returns };
+			fns[node->name] = ktypes::kfndec_t{ node->name, types, node->returns, node->is_variadic };
 		}
 	}
 	visit_root(root);
@@ -191,11 +191,16 @@ void compiler::Compiler::visit_call(std::shared_ptr<parser::CallNode> node, std:
 	//	 textSection.push_back("xor " + argregs[i] + ", " + argregs[i]);
 	// }
 
-	if (fns[node->routine].argtps.size() != node->args.size())
-		throw errors::kiterr("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()), node->line, node->pos_start, node->pos_end);
+	if(fns[node->routine].is_variadic)
+		if (fns[node->routine].argtps.size() > node->args.size())
+			throw errors::kiterr("wrong amount of arguments given to function " + node->routine + ". expected at least " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()), node->line, node->pos_start, node->pos_end);
+	
+	if (!fns[node->routine].is_variadic)
+		if (fns[node->routine].argtps.size() != node->args.size())
+			throw errors::kiterr("wrong amount of arguments given to function " + node->routine + ". expected " + std::to_string(fns[node->routine].argtps.size()) + ", got " + std::to_string(node->args.size()), node->line, node->pos_start, node->pos_end);
 
-	for (int i = 0; i < node->args.size(); i++) {
-		ktypes::ktype_t resultReturn = semantics::would_return(node->args[i], vartypes, fns);
+	for (int i = 0; i < fns[node->routine].argtps.size(); i++) {
+		ktypes::ktype_t resultReturn = (fns[node->routine].is_variadic && i >= node->args.size()) ? ktypes::ANY : semantics::would_return(node->args[i], vartypes, fns);
 
 		if (!semantics::compatible(fns[node->routine].argtps[i], resultReturn))
 			throw errors::kiterr("function " + node->routine + ", argument " + std::to_string(i + 1) + ": incompatible types " + ktypes::ktype_tn[fns[node->routine].argtps[i]] + " and " + ktypes::ktype_tn[resultReturn], node->args[i]->line, node->args[i]->pos_start, node->args[i]->pos_end);

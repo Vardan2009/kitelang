@@ -201,8 +201,9 @@ namespace parser {
 		std::shared_ptr<RootNode> root;
 		std::vector<ktypes::kval_t> args;
 		ktypes::ktype_t returns;
-		FnNode(std::string rout, std::vector<ktypes::kval_t> args, ktypes::ktype_t returns, std::shared_ptr<RootNode> rt, int line, int pos_start, int pos_end)
-			: name(rout), root(rt), args(args), returns(returns) {
+		bool is_variadic;
+		FnNode(std::string rout, std::vector<ktypes::kval_t> args, ktypes::ktype_t returns, std::shared_ptr<RootNode> rt, bool is_variadic, int line, int pos_start, int pos_end)
+			: name(rout), root(rt), args(args), returns(returns), is_variadic(is_variadic) {
 			type = FN;
 			this->line = line;
 			this->pos_start = pos_start;

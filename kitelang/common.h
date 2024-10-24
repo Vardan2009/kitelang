@@ -29,6 +29,7 @@ namespace ktypes {
 		std::string name;
 		std::vector<ktype_t> argtps;
 		ktype_t returns;
+		bool is_variadic;
 	} kfndec_t;
 
 	extern std::map<std::string, ktype_t> nktype_t;

@@ -44,6 +44,7 @@ namespace lexer {
 			{">=", lexer::GTE},
 			{"<=", lexer::LTE},
 			{"->", lexer::ARROW},
+			{"::", lexer::VAARG},
 		};
 		// map of each prefix and its token type
 		std::map<char, lexer::token_t> prefixes = {
