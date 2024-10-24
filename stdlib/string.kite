@@ -1,7 +1,7 @@
 ~
 KITE STRING MODULE
 ~
-#include <math.km>
+#include "include/math.km"
 
 ~
 strlen function

@@ -67,7 +67,7 @@ std::string Precompiler::precompile(const std::string& source) {
 }
 
 std::string Precompiler::handleInclude(const std::string& filename, char type) {
-    std::string normalizedFilename = fs::path(filename).filename().string();
+    std::string normalizedFilename = filename;
 
     if (includedFiles.find(normalizedFilename) != includedFiles.end()) {
         std::cout << "Skipping already included file: " << normalizedFilename << std::endl;

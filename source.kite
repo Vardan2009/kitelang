@@ -1,10 +1,33 @@
 #include <stdio.km>
+#include <string.km>
 
+~
+`_start` function
+This is the entry point of an application
+args:
+	argc: command-line argument count
+	argc: command line arguments
+		(64-bit pointer to 8-bit pointer, C syntax: char *argv[])
+~
 global _start
-fn _start(
-		argc : int64,
-		argv : ptr64
-) : byte {
-	print(argv[0])
+fn _start(argc : int32, argv : ptr64) : byte {
+	print("Hello, Kite!\n")
+
+	let buffer1 : char[512]
+	let buffer2 : char[512]
+	let n1 : int64 = 0
+	let n2 : int64 = 0
+
+	print("Enter number 1: ")
+	readln(buffer1, 512)
+	n1 = stoi(buffer1)
+	print("Enter number 2: ")
+	readln(buffer2, 512)
+	n2 = stoi(buffer2)
+
+	print("The sum of those two numbers are: ")
+	printi(n1 + n2)
+	printc('\n')
+
 	return 0
 }

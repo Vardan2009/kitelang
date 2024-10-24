@@ -13,5 +13,5 @@ if [ $? -ne 0 ]; then
 fi
 
 clear
-kbuild/source
+./kbuild/source "$@"
 echo "\n\n\n[Program exited with exit code $?]"
