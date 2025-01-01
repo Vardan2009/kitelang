@@ -241,6 +241,10 @@ std::shared_ptr<parser::IfNode> parser::Parser::if_node() {
 		ifn->else_block = statement();
 		ifn->has_else_block = true;
 	}
+	else {
+		ifn->else_block = nullptr;
+		ifn->has_else_block = false;
+	}
 	return ifn;
 }
 

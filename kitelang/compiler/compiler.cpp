@@ -110,7 +110,7 @@ void compiler::Compiler::visit_deref(std::shared_ptr<parser::DerefNode> node, st
 	if (varlocs.find(node->name) == varlocs.end())
 		throw errors::kiterr("variable " + node->name + " is not present in this context", node->line, node->pos_start, node->pos_end);
 	textSection.push_back("mov " + reg + ", [" + "rsp + " + std::to_string(get_variable_offset(node->name)) + "]");
-	textSection.push_back("mov " + reg + ", [" + reg + "]");
+	textSection.push_back("mov " + b64r[reg] + ", [" + b64r[reg] + "]");
 }
 
 void compiler::Compiler::visit_var(std::shared_ptr<parser::VarNode> node, std::string reg) {

@@ -3,7 +3,7 @@
 ktypes::ktype_t semantics::would_return(std::shared_ptr<parser::Node> node, std::map <std::string, ktypes::ktype_t> vartypes, std::map <std::string, ktypes::kfndec_t> fns) {
 	switch (node->type) {
 	case parser::CALL:   return call_would_return(std::static_pointer_cast<parser::CallNode>(node), fns);
-	case parser::ADDROF: return ktypes::PTR64;
+	case parser::ADDROF: return addrof_would_return(std::static_pointer_cast<parser::AddrOfNode>(node), vartypes);
 	case parser::DEREF:  return ktypes::ANY;
 	case parser::BINOP: return ktypes::ANY;
 	case parser::CHAR_LIT: return ktypes::CHAR;
@@ -13,6 +13,29 @@ ktypes::ktype_t semantics::would_return(std::shared_ptr<parser::Node> node, std:
 	case parser::REG: return ktypes::ANY;
 	case parser::VAR: return var_would_return(std::static_pointer_cast<parser::VarNode>(node), vartypes);
 	}
+}
+
+ktypes::ktype_t semantics::addrof_would_return(std::shared_ptr<parser::AddrOfNode> node, std::map <std::string, ktypes::ktype_t> vartypes) {
+	switch (vartypes[node->name])
+	{
+	case ktypes::CHAR:
+	case ktypes::BYTE:
+	case ktypes::BOOL:
+		return ktypes::PTR8;
+	case ktypes::INT16:
+		return ktypes::PTR16;
+	case ktypes::INT32:
+		return ktypes::PTR32;
+	case ktypes::INT64:
+	case ktypes::PTR8:
+	case ktypes::PTR16:
+	case ktypes::PTR32:
+	case ktypes::PTR64:
+	default:
+		return ktypes::PTR64;
+		break;
+	}
+	return ktypes::PTR64;
 }
 
 ktypes::ktype_t semantics::call_would_return(std::shared_ptr<parser::CallNode> node, std::map <std::string, ktypes::kfndec_t> fns) {
