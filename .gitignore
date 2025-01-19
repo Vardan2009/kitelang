@@ -365,6 +365,10 @@ FodyWeavers.xsd
 # Kite output build files
 kbuild/*
 
-# CMake temp files
+# CMake generated files
 CMakeFiles
 CMakeCache.txt
+kitelang/kitelang
+kitelang/Makefile
+cmake_install.cmake
+/Makefile
