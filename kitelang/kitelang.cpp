@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
 	std::ifstream file(argv[1]);
 	std::string src;
 
-	std::filesystem::path path(argv[1]);
+	std::filesystem::path path = std::filesystem::absolute(argv[1]);
 
 	// exit if file failed to open
 	if (!file.is_open() || !file) {
