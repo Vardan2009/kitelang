@@ -1,4 +1,5 @@
-#!/bin/sh
+sh buildkite.sh
+kitelang/kitelang source.kite
 
 nasm -felf64 -o kbuild/source.o kbuild/source.asm
 if [ $? -ne 0 ]; then
