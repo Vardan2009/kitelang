@@ -1,19 +1,19 @@
 AS := nasm
 ASMFLAGS := -felf64
-SRC := $(wildcard kbuild/*.asm)
 KSRC := $(wildcard *.kite)
-OBJ := $(SRC:.asm=.o)
-
-%.o: %.asm
-	$(AS) $(ASMFLAGS) $< -o $@
-
-compilekite: $(KSRC)
-	../kitelang/kitelang $<
+KITE := ../kitelang/kitelang
 
 all: $(OBJ)
+	@$(foreach kfile, $(KSRC), \
+		$(KITE) $(kfile);)
+
+	@$(foreach sfile, $(patsubst %.kite,kbuild/%.asm,$(KSRC)), \
+		$(AS) $(ASMFLAGS) $(sfile) -o $(sfile:.asm=.o);)
+
 	mkdir -p obj
-	mv $(OBJ) obj/
-	rm -f kbuild/*.asm
+	mv kbuild/*.o obj/
+
+	rm -rf kbuild
 
 clean:
 	rm -rf obj

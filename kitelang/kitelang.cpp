@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	// print the result to file stream
-	system("mkdir kbuild");
+	system("mkdir -p kbuild");
 	std::ofstream outFile("kbuild/" + path.filename().replace_extension().string() + ".asm", std::ios::trunc);
 	if (!outFile) {
 		std::cerr << "Error opening file for writing." << std::endl;
@@ -126,13 +126,13 @@ int main(int argc, char* argv[]) {
 	// build executable (NASM and LD required)
 
 	// build to object file (NASM required)
-	std::cout << "nasm -felf64 -o kbuild/" + projname + ".o kbuild/" + projname + ".asm\n";
+	// std::cout << "nasm -felf64 -o kbuild/" + projname + ".o kbuild/" + projname + ".asm\n";
 
 	// comment out if running linux with nasm and ld
 	// system(("nasm -felf64 -o kbuild/" + projname + ".o kbuild/" + projname + ".asm").c_str());
 
 	// link with stdlibs
-	std::cout << "ld -o kbuild/" + projname + " kbuild/" + projname + ".o " + stdlibobjs << std::endl;
+	// std::cout << "ld -o kbuild/" + projname + " kbuild/" + projname + ".o " + stdlibobjs << std::endl;
 	// comment out if running linux with nasm and ld
 	// system(("ld -o kbuild/" + projname + " kbuild/" + projname + ".o " + stdlibobjs).c_str());
 
