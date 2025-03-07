@@ -1,4 +1,4 @@
-﻿
+
 #include "kitelang.h"
 #include <filesystem>
 
@@ -10,9 +10,7 @@ static std::string nthln(const std::string& str, int n) {
 	while (std::getline(stream, line)) {
 		++lineNumber;
 		if (lineNumber == n) {
-			for (char& ch : line)
-				if (ch == '\t')
-					ch = ' ';
+			for (char& ch : line) if (ch == '\t') ch = ' ';
 			return line;
 		}
 	}
